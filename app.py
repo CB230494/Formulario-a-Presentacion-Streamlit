@@ -1,7 +1,6 @@
 import streamlit as st
 from pptx import Presentation
 from pptx.util import Inches, Pt
-from pptx.enum.shapes import MSO_SHAPE
 from pptx.dml.color import RGBColor
 import requests
 from io import BytesIO
@@ -22,7 +21,7 @@ with st.form("formulario_informe"):
     ])
     delegacion_policial = st.text_input("Delegación Policial")
     fecha_ejecucion = st.date_input("Fecha de ejecución")
-    
+
     st.subheader("🔹 Contenido del Informe")
     descripcion_resultados = st.text_area("Breve descripción de resultados obtenidos")
     analisis_operativo = st.text_area("Análisis o balance operativo")
@@ -36,8 +35,28 @@ def cargar_plantilla(url):
     respuesta = requests.get(url)
     return BytesIO(respuesta.content)
 
+def reemplazar_portada(prs, delegacion, direccion):
+    portada = prs.slides[0]
+    for shape in portada.shapes:
+        if shape.has_text_frame:
+            text = shape.text_frame.text
+            if "DELEGACION_POLICIAL" in text:
+                shape.text_frame.clear()
+                p = shape.text_frame.paragraphs[0]
+                p.text = delegacion
+                p.font.bold = True
+                p.font.size = Pt(48)
+                p.font.name = 'Arial'
+            if "DIRECCION_REGIONAL" in text:
+                shape.text_frame.clear()
+                p = shape.text_frame.paragraphs[0]
+                p.text = direccion
+                p.font.bold = True
+                p.font.size = Pt(36)
+                p.font.name = 'Arial'
+
 def crear_diapositiva_con_estilo(prs, titulo_texto, contenido_texto):
-    slide_layout = prs.slide_layouts[6]  # Layout vacío
+    slide_layout = prs.slide_layouts[6]  # Slide vacío
     slide = prs.slides.add_slide(slide_layout)
 
     # Fondo azul claro
@@ -46,7 +65,7 @@ def crear_diapositiva_con_estilo(prs, titulo_texto, contenido_texto):
     fill.solid()
     fill.fore_color.rgb = RGBColor(230, 240, 255)
 
-    # Agregar título
+    # Título
     left = Inches(0.5)
     top = Inches(0.5)
     width = Inches(8)
@@ -60,33 +79,27 @@ def crear_diapositiva_con_estilo(prs, titulo_texto, contenido_texto):
     p.font.name = 'Arial'
     p.font.color.rgb = RGBColor(0, 51, 102)  # Azul oscuro
 
-    # Agregar contenido
+    # Contenido
     left = Inches(0.5)
     top = Inches(1.8)
     width = Inches(8)
-    height = Inches(4.5)
-    body_box = slide.shapes.add_textbox(left, top, width, height)
-    tf = body_box.text_frame
+    height = Inches(5)
+    content_box = slide.shapes.add_textbox(left, top, width, height)
+    tf = content_box.text_frame
     p = tf.add_paragraph()
     p.text = contenido_texto
     p.font.size = Pt(24)
     p.font.name = 'Calibri'
-    p.font.color.rgb = RGBColor(0, 0, 0)  # Negro
+    p.font.color.rgb = RGBColor(0, 0, 0)
     tf.word_wrap = True
 
 def generar_pptx(datos, plantilla_bytes):
     prs = Presentation(plantilla_bytes)
 
-    # Conservar portada (slide 0) y página institucional (slide 2)
-    portada = prs.slides[0]
-    pagina_institucional = prs.slides[2]
+    # 1. Reemplazar portada
+    reemplazar_portada(prs, datos['delegacion_policial'], datos['direccion_regional'])
 
-    # Eliminar el placeholder (slide 1)
-    r_id = prs.slides._sldIdLst[1].rId
-    prs.part.drop_rel(r_id)
-    del prs.slides._sldIdLst[1]
-
-    # Insertar las diapositivas generadas
+    # 2. Insertar diapositivas dinámicas (después de la portada)
     crear_diapositiva_con_estilo(prs, "Información General", 
         f"Nombre del Dispositivo: {datos['nombre_dispositivo']}\n"
         f"Responsable: {datos['nombre_responsable']}\n"
@@ -98,14 +111,14 @@ def generar_pptx(datos, plantilla_bytes):
     crear_diapositiva_con_estilo(prs, "Análisis Operativo", datos['analisis_operativo'])
     crear_diapositiva_con_estilo(prs, "Recomendaciones", datos['recomendaciones'])
 
-    # La página institucional ya está colocada al final automáticamente
+    # No tocamos la última página (ya está lista en la plantilla)
 
     ppt_buffer = BytesIO()
     prs.save(ppt_buffer)
     ppt_buffer.seek(0)
     return ppt_buffer
 
-# ---- ACCIÓN TRAS ENVIAR ----
+# ---- DESPUÉS DE ENVIAR FORMULARIO ----
 if enviar:
     campos = [
         nombre_dispositivo, nombre_responsable, cargo_responsable,
