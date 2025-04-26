@@ -1,7 +1,6 @@
 import streamlit as st
 from fpdf import FPDF
 import datetime
-import requests
 from io import BytesIO
 
 st.set_page_config(page_title="Generador de Informe en PDF", layout="centered")
@@ -28,54 +27,78 @@ with st.form("formulario_informe"):
     enviar = st.form_submit_button("📤 Generar Informe PDF")
 
 # ---- FUNCIONES ----
-def generar_pdf(datos):
-    pdf = FPDF()
-    pdf.add_page()
+class PDF(FPDF):
+    def header(self):
+        # Línea azul en la parte superior
+        self.set_fill_color(0, 51, 102)  # Azul institucional
+        self.rect(0, 0, 210, 15, 'F')
+        self.set_y(5)
+        self.set_font('Arial', 'B', 16)
+        self.set_text_color(255, 255, 255)  # Blanco
+        self.cell(0, 10, 'Informe de Dispositivo Policial', ln=True, align='C')
 
-    # Encabezado
-    pdf.set_font("Arial", "B", 20)
-    pdf.set_text_color(0, 51, 102)  # Azul oscuro
-    pdf.cell(0, 10, "Informe de Dispositivo Policial", ln=True, align="C")
+    def footer(self):
+        self.set_y(-20)
+        self.set_font('Arial', 'I', 10)
+        self.set_text_color(0, 0, 0)
+        self.cell(0, 10, 'Dirección de Programas Policiales Preventivos - Sembremos Seguridad', align='C')
+
+def generar_pdf(datos):
+    pdf = PDF()
+    pdf.add_page()
+    pdf.set_auto_page_break(auto=True, margin=15)
+
+    # Espaciado después del encabezado
     pdf.ln(10)
 
-    # Datos generales
-    pdf.set_font("Arial", "B", 14)
+    # Información general
+    pdf.set_font('Arial', 'B', 14)
+    pdf.set_text_color(0, 51, 102)
+    pdf.cell(0, 10, 'Información General', ln=True)
     pdf.set_text_color(0, 0, 0)
+    pdf.set_font('Arial', '', 12)
+    pdf.ln(2)
+    pdf.multi_cell(0, 8, 
+        f"Delegación Policial: {datos['delegacion_policial']}\n"
+        f"Dirección Regional: {datos['direccion_regional']}\n"
+        f"Nombre del Dispositivo: {datos['nombre_dispositivo']}\n"
+        f"Responsable: {datos['nombre_responsable']}\n"
+        f"Cargo del Responsable: {datos['cargo_responsable']}\n"
+        f"Fecha de Ejecución: {datos['fecha_ejecucion']}"
+    )
 
-    pdf.cell(0, 10, "Delegación Policial: " + datos['delegacion_policial'], ln=True)
-    pdf.cell(0, 10, "Dirección Regional: " + datos['direccion_regional'], ln=True)
-    pdf.cell(0, 10, "", ln=True)
-
-    pdf.set_font("Arial", "", 12)
-    pdf.cell(0, 8, f"Nombre del Dispositivo: {datos['nombre_dispositivo']}", ln=True)
-    pdf.cell(0, 8, f"Responsable: {datos['nombre_responsable']}", ln=True)
-    pdf.cell(0, 8, f"Cargo del Responsable: {datos['cargo_responsable']}", ln=True)
-    pdf.cell(0, 8, f"Fecha de Ejecución: {datos['fecha_ejecucion']}", ln=True)
     pdf.ln(8)
 
-    # Secciones
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "Resultados Obtenidos:", ln=True)
-    pdf.set_font("Arial", "", 12)
+    # Resultados
+    pdf.set_font('Arial', 'B', 14)
+    pdf.set_text_color(0, 51, 102)
+    pdf.cell(0, 10, 'Resultados Obtenidos', ln=True)
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_font('Arial', '', 12)
+    pdf.ln(2)
     pdf.multi_cell(0, 8, datos['descripcion_resultados'])
-    pdf.ln(5)
 
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "Análisis Operativo:", ln=True)
-    pdf.set_font("Arial", "", 12)
+    pdf.ln(8)
+
+    # Análisis Operativo
+    pdf.set_font('Arial', 'B', 14)
+    pdf.set_text_color(0, 51, 102)
+    pdf.cell(0, 10, 'Análisis Operativo', ln=True)
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_font('Arial', '', 12)
+    pdf.ln(2)
     pdf.multi_cell(0, 8, datos['analisis_operativo'])
-    pdf.ln(5)
 
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "Recomendaciones:", ln=True)
-    pdf.set_font("Arial", "", 12)
+    pdf.ln(8)
+
+    # Recomendaciones
+    pdf.set_font('Arial', 'B', 14)
+    pdf.set_text_color(0, 51, 102)
+    pdf.cell(0, 10, 'Recomendaciones', ln=True)
+    pdf.set_text_color(0, 0, 0)
+    pdf.set_font('Arial', '', 12)
+    pdf.ln(2)
     pdf.multi_cell(0, 8, datos['recomendaciones'])
-    pdf.ln(10)
-
-    # Pie de página
-    pdf.set_y(-30)
-    pdf.set_font("Arial", "I", 10)
-    pdf.cell(0, 10, "Dirección de Programas Policiales Preventivos", align="C")
 
     # Guardar en memoria
     buffer = BytesIO()
