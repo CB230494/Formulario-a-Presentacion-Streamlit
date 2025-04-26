@@ -1,14 +1,12 @@
 import streamlit as st
-from pptx import Presentation
-from pptx.util import Inches, Pt
-from pptx.dml.color import RGBColor
+from fpdf import FPDF
+import datetime
 import requests
 from io import BytesIO
-import datetime
 
-st.set_page_config(page_title="Informe Policial Automático", layout="centered")
+st.set_page_config(page_title="Generador de Informe en PDF", layout="centered")
 
-st.title("🚔 Generador de Informe de Dispositivo Policial")
+st.title("🚔 Generador de Informe de Dispositivo Policial en PDF")
 
 # ---- FORMULARIO ----
 with st.form("formulario_informe"):
@@ -27,111 +25,64 @@ with st.form("formulario_informe"):
     analisis_operativo = st.text_area("Análisis o balance operativo")
     recomendaciones = st.text_area("Recomendaciones o sugerencias")
 
-    enviar = st.form_submit_button("📤 Generar Informe PPTX")
+    enviar = st.form_submit_button("📤 Generar Informe PDF")
 
 # ---- FUNCIONES ----
-@st.cache_resource
-def cargar_plantilla(url):
-    respuesta = requests.get(url)
-    return BytesIO(respuesta.content)
+def generar_pdf(datos):
+    pdf = FPDF()
+    pdf.add_page()
 
-def reemplazar_portada(prs, delegacion, direccion):
-    portada = prs.slides[0]
-    for shape in portada.shapes:
-        if shape.has_text_frame:
-            text = shape.text_frame.text
-            if "DELEGACION_POLICIAL" in text:
-                shape.text_frame.clear()
-                p = shape.text_frame.paragraphs[0]
-                p.text = delegacion
-                p.font.bold = True
-                p.font.size = Pt(48)
-                p.font.name = 'Arial'
-            if "DIRECCION_REGIONAL" in text:
-                shape.text_frame.clear()
-                p = shape.text_frame.paragraphs[0]
-                p.text = direccion
-                p.font.bold = True
-                p.font.size = Pt(36)
-                p.font.name = 'Arial'
+    # Encabezado
+    pdf.set_font("Arial", "B", 20)
+    pdf.set_text_color(0, 51, 102)  # Azul oscuro
+    pdf.cell(0, 10, "Informe de Dispositivo Policial", ln=True, align="C")
+    pdf.ln(10)
 
-def crear_diapositiva_con_estilo(prs, titulo_texto, contenido_texto):
-    slide_layout = prs.slide_layouts[6]  # Slide vacío
-    slide = prs.slides.add_slide(slide_layout)
+    # Datos generales
+    pdf.set_font("Arial", "B", 14)
+    pdf.set_text_color(0, 0, 0)
 
-    # Fondo azul claro
-    background = slide.background
-    fill = background.fill
-    fill.solid()
-    fill.fore_color.rgb = RGBColor(230, 240, 255)
+    pdf.cell(0, 10, "Delegación Policial: " + datos['delegacion_policial'], ln=True)
+    pdf.cell(0, 10, "Dirección Regional: " + datos['direccion_regional'], ln=True)
+    pdf.cell(0, 10, "", ln=True)
 
-    # Título
-    left = Inches(0.5)
-    top = Inches(0.5)
-    width = Inches(8)
-    height = Inches(1)
-    title_box = slide.shapes.add_textbox(left, top, width, height)
-    tf = title_box.text_frame
-    p = tf.add_paragraph()
-    p.text = titulo_texto
-    p.font.bold = True
-    p.font.size = Pt(36)
-    p.font.name = 'Arial'
-    p.font.color.rgb = RGBColor(0, 51, 102)  # Azul oscuro
+    pdf.set_font("Arial", "", 12)
+    pdf.cell(0, 8, f"Nombre del Dispositivo: {datos['nombre_dispositivo']}", ln=True)
+    pdf.cell(0, 8, f"Responsable: {datos['nombre_responsable']}", ln=True)
+    pdf.cell(0, 8, f"Cargo del Responsable: {datos['cargo_responsable']}", ln=True)
+    pdf.cell(0, 8, f"Fecha de Ejecución: {datos['fecha_ejecucion']}", ln=True)
+    pdf.ln(8)
 
-    # Contenido
-    left = Inches(0.5)
-    top = Inches(1.8)
-    width = Inches(8)
-    height = Inches(5)
-    content_box = slide.shapes.add_textbox(left, top, width, height)
-    tf = content_box.text_frame
-    p = tf.add_paragraph()
-    p.text = contenido_texto
-    p.font.size = Pt(24)
-    p.font.name = 'Calibri'
-    p.font.color.rgb = RGBColor(0, 0, 0)
-    tf.word_wrap = True
+    # Secciones
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, "Resultados Obtenidos:", ln=True)
+    pdf.set_font("Arial", "", 12)
+    pdf.multi_cell(0, 8, datos['descripcion_resultados'])
+    pdf.ln(5)
 
-def generar_pptx(datos, plantilla_bytes):
-    prs = Presentation(plantilla_bytes)
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, "Análisis Operativo:", ln=True)
+    pdf.set_font("Arial", "", 12)
+    pdf.multi_cell(0, 8, datos['analisis_operativo'])
+    pdf.ln(5)
 
-    # Guardar portada (slide 0) y página institucional (última slide)
-    portada = prs.slides[0]
-    pagina_institucional = prs.slides[1]
+    pdf.set_font("Arial", "B", 14)
+    pdf.cell(0, 10, "Recomendaciones:", ln=True)
+    pdf.set_font("Arial", "", 12)
+    pdf.multi_cell(0, 8, datos['recomendaciones'])
+    pdf.ln(10)
 
-    # Eliminar todo excepto la portada
-    for i in range(len(prs.slides) - 1, 0, -1):
-        r_id = prs.slides._sldIdLst[i].rId
-        prs.part.drop_rel(r_id)
-        del prs.slides._sldIdLst[i]
+    # Pie de página
+    pdf.set_y(-30)
+    pdf.set_font("Arial", "I", 10)
+    pdf.cell(0, 10, "Dirección de Programas Policiales Preventivos", align="C")
 
-    # Reemplazar textos en la portada
-    reemplazar_portada(prs, datos['delegacion_policial'], datos['direccion_regional'])
+    # Guardar en memoria
+    buffer = BytesIO()
+    pdf.output(buffer)
+    buffer.seek(0)
 
-    # Insertar nuevas diapositivas generadas
-    crear_diapositiva_con_estilo(prs, "Información General", 
-        f"Nombre del Dispositivo: {datos['nombre_dispositivo']}\n"
-        f"Responsable: {datos['nombre_responsable']}\n"
-        f"Cargo del Responsable: {datos['cargo_responsable']}\n"
-        f"Fecha de Ejecución: {datos['fecha_ejecucion']}"
-    )
-
-    crear_diapositiva_con_estilo(prs, "Resultados Obtenidos", datos['descripcion_resultados'])
-    crear_diapositiva_con_estilo(prs, "Análisis Operativo", datos['analisis_operativo'])
-    crear_diapositiva_con_estilo(prs, "Recomendaciones", datos['recomendaciones'])
-
-    # Insertar la página institucional al final
-    slide_layout = prs.slide_layouts[6]
-    new_slide = prs.slides.add_slide(slide_layout)
-    for shape in pagina_institucional.shapes:
-        new_element = shape.element
-        new_slide.shapes._spTree.insert_element_before(new_element, 'p:extLst')
-
-    ppt_buffer = BytesIO()
-    prs.save(ppt_buffer)
-    ppt_buffer.seek(0)
-    return ppt_buffer
+    return buffer
 
 # ---- DESPUÉS DE ENVIAR FORMULARIO ----
 if enviar:
@@ -143,16 +94,13 @@ if enviar:
     if not all(campos):
         st.error("⚠️ Completa todos los campos para generar el informe.")
     else:
-        st.success("✅ Informe generado correctamente.")
-
-        plantilla_url = "https://github.com/CB230494/Formulario-a-Presentacion-Streamlit/raw/refs/heads/main/plantilla_personalizada.pptx"
-        plantilla_bytes = cargar_plantilla(plantilla_url)
+        st.success("✅ Informe PDF generado correctamente.")
 
         datos = {
             'nombre_dispositivo': nombre_dispositivo,
             'nombre_responsable': nombre_responsable,
             'cargo_responsable': cargo_responsable,
-            'direccion_regional': f"Dirección Regional {direccion_regional}",
+            'direccion_regional': direccion_regional,
             'delegacion_policial': delegacion_policial,
             'fecha_ejecucion': fecha_ejecucion.strftime("%d/%m/%Y"),
             'descripcion_resultados': descripcion_resultados,
@@ -160,14 +108,14 @@ if enviar:
             'recomendaciones': recomendaciones
         }
 
-        ppt_buffer = generar_pptx(datos, plantilla_bytes)
+        pdf_buffer = generar_pdf(datos)
 
-        nombre_archivo = f"Informe_{nombre_dispositivo.replace(' ', '_')}_{datetime.datetime.now().strftime('%Y%m%d')}.pptx"
+        nombre_archivo = f"Informe_{nombre_dispositivo.replace(' ', '_')}_{datetime.datetime.now().strftime('%Y%m%d')}.pdf"
 
         st.download_button(
-            label="📥 Descargar Informe PPTX",
-            data=ppt_buffer,
+            label="📥 Descargar Informe en PDF",
+            data=pdf_buffer,
             file_name=nombre_archivo,
-            mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
+            mime="application/pdf"
         )
 
