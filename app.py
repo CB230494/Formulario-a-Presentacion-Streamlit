@@ -37,20 +37,29 @@ def cargar_plantilla(url):
 def generar_pptx(datos, plantilla_bytes):
     prs = Presentation(plantilla_bytes)
 
-    # Portada - Slide 1
+    # Portada - Slide 1 (solo Delegación y Dirección Regional)
     portada = prs.slides[0]
     for shape in portada.shapes:
         if shape.has_text_frame:
             texto = shape.text_frame.text
-            texto = texto.replace("NOMBRE_DISPOSITIVO", datos['nombre_dispositivo'])
-            texto = texto.replace("FECHA_EJECUCION", datos['fecha_ejecucion'])
-            texto = texto.replace("NOMBRE_RESPONSABLE", datos['nombre_responsable'])
-            texto = texto.replace("CARGO_RESPONSABLE", datos['cargo_responsable'])
-            texto = texto.replace("DIRECCION_REGIONAL", datos['direccion_regional'])
             texto = texto.replace("DELEGACION_POLICIAL", datos['delegacion_policial'])
+            texto = texto.replace("DIRECCION_REGIONAL", datos['direccion_regional'])
             shape.text_frame.text = texto
 
-    # Segunda diapositiva - Resultados
+    # Segunda diapositiva - Datos del dispositivo
+    slide_dispositivo = prs.slides.add_slide(prs.slide_layouts[1])
+    titulo = slide_dispositivo.shapes.title
+    contenido = slide_dispositivo.placeholders[1]
+
+    titulo.text = "Información General del Dispositivo"
+    contenido.text = (
+        f"Nombre del Dispositivo: {datos['nombre_dispositivo']}\n"
+        f"Responsable: {datos['nombre_responsable']}\n"
+        f"Cargo del Responsable: {datos['cargo_responsable']}\n"
+        f"Fecha de Ejecución: {datos['fecha_ejecucion']}"
+    )
+
+    # Tercera diapositiva - Resultados
     slide_resultados = prs.slides.add_slide(prs.slide_layouts[1])
     titulo = slide_resultados.shapes.title
     contenido = slide_resultados.placeholders[1]
@@ -58,7 +67,7 @@ def generar_pptx(datos, plantilla_bytes):
     titulo.text = "Resultados Obtenidos"
     contenido.text = datos['descripcion_resultados']
 
-    # Tercera diapositiva - Análisis operativo
+    # Cuarta diapositiva - Análisis operativo
     slide_analisis = prs.slides.add_slide(prs.slide_layouts[1])
     titulo = slide_analisis.shapes.title
     contenido = slide_analisis.placeholders[1]
@@ -66,7 +75,7 @@ def generar_pptx(datos, plantilla_bytes):
     titulo.text = "Análisis Operativo"
     contenido.text = datos['analisis_operativo']
 
-    # Cuarta diapositiva - Recomendaciones
+    # Quinta diapositiva - Recomendaciones
     slide_recomendaciones = prs.slides.add_slide(prs.slide_layouts[1])
     titulo = slide_recomendaciones.shapes.title
     contenido = slide_recomendaciones.placeholders[1]
@@ -92,7 +101,7 @@ if enviar:
     else:
         st.success("✅ Informe generado correctamente.")
 
-        # URL correcta de la plantilla en GitHub
+        # URL correcta de tu plantilla en GitHub
         plantilla_url = "https://github.com/CB230494/Formulario-a-Presentacion-Streamlit/raw/refs/heads/main/plantilla_personalizada.pptx"
         plantilla_bytes = cargar_plantilla(plantilla_url)
 
@@ -118,3 +127,4 @@ if enviar:
             file_name=nombre_archivo,
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
+
