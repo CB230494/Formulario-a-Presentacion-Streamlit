@@ -74,25 +74,19 @@ def crear_diapositiva_con_estilo(prs, titulo_texto, contenido_texto):
     p.font.color.rgb = RGBColor(0, 0, 0)  # Negro
     tf.word_wrap = True
 
-def mover_diapositiva(prs, index_origen, index_destino):
-    xml_slides = prs.slides._sldIdLst
-    slides = list(xml_slides)
-    xml_slides.insert(index_destino, slides.pop(index_origen))
-
 def generar_pptx(datos, plantilla_bytes):
     prs = Presentation(plantilla_bytes)
 
-    # Guardar la portada (slide 0) y la página institucional (slide 1)
+    # Conservar portada (slide 0) y página institucional (slide 2)
     portada = prs.slides[0]
-    institucional = prs.slides[1]
+    pagina_institucional = prs.slides[2]
 
-    # Eliminar todo excepto la portada para insertar contenido
-    for i in range(len(prs.slides) - 1, 0, -1):
-        r_id = prs.slides._sldIdLst[i].rId
-        prs.part.drop_rel(r_id)
-        del prs.slides._sldIdLst[i]
+    # Eliminar el placeholder (slide 1)
+    r_id = prs.slides._sldIdLst[1].rId
+    prs.part.drop_rel(r_id)
+    del prs.slides._sldIdLst[1]
 
-    # Insertar las nuevas diapositivas generadas
+    # Insertar las diapositivas generadas
     crear_diapositiva_con_estilo(prs, "Información General", 
         f"Nombre del Dispositivo: {datos['nombre_dispositivo']}\n"
         f"Responsable: {datos['nombre_responsable']}\n"
@@ -104,14 +98,7 @@ def generar_pptx(datos, plantilla_bytes):
     crear_diapositiva_con_estilo(prs, "Análisis Operativo", datos['analisis_operativo'])
     crear_diapositiva_con_estilo(prs, "Recomendaciones", datos['recomendaciones'])
 
-    # Volver a agregar la página institucional al final
-    slide_layout = prs.slide_layouts[6]  # Layout vacío
-    new_slide = prs.slides.add_slide(slide_layout)
-    for shape in institucional.shapes:
-        el = shape.element
-        new_slide.shapes._spTree.insert_element_before(el, 'p:extLst')
-
-    # Ajustar el fondo de la última página (opcional)
+    # La página institucional ya está colocada al final automáticamente
 
     ppt_buffer = BytesIO()
     prs.save(ppt_buffer)
@@ -155,5 +142,3 @@ if enviar:
             file_name=nombre_archivo,
             mime="application/vnd.openxmlformats-officedocument.presentationml.presentation"
         )
-
-
