@@ -74,7 +74,7 @@ with st.form("formulario_informe"):
 class PDF(FPDF):
     def header(self):
         # Colocar el logo
-        self.image('imagenes/logo.png', 10, 6, 30) # Ajusta ruta y tamaño aquí
+        self.image('logo.png', 10, 6, 30) # Ajusta ruta y tamaño aquí
 
         # Configurar color verde oscuro
         self.set_y(10)
