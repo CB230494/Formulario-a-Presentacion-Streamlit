@@ -103,51 +103,54 @@ def generar_pdf(datos):
         pdf.set_text_color(0, 0, 0)
         pdf.multi_cell(0, 8, content)
 
-    def add_table(title, checklist):
-        if pdf.get_y() > 230:
+def add_table(title, checklist):
+    if pdf.get_y() > 230:
+        pdf.add_page()
+    pdf.ln(10)
+    pdf.set_font('Arial', 'B', 14)
+    pdf.set_text_color(0, 51, 102)
+    pdf.cell(0, 10, title, ln=True)
+    pdf.ln(4)
+
+    pdf.set_font('Arial', 'B', 12)
+    pdf.set_text_color(0, 0, 0)
+
+    col_widths = [140, 40]  # Ancho columnas
+
+    # Encabezado de la tabla
+    pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
+    pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
+    pdf.ln()
+
+    pdf.set_font('Arial', '', 11)
+
+    for aspecto, cumple in checklist.items():
+        # --- Calcula la altura necesaria ---
+        aspecto_lines = pdf.multi_cell(col_widths[0], 8, aspecto, border=0, split_only=True)
+        altura_fila = 8 * len(aspecto_lines)
+
+        if pdf.get_y() + altura_fila > 270:  # Si falta espacio
             pdf.add_page()
-        pdf.ln(10)
-        pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(0, 51, 102)
-        pdf.cell(0, 10, title, ln=True)
-        pdf.ln(4)
+            pdf.set_font('Arial', 'B', 12)
+            pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
+            pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
+            pdf.ln()
+            pdf.set_font('Arial', '', 11)
 
-        pdf.set_font('Arial', 'B', 12)
-        pdf.set_text_color(0, 0, 0)
+        # --- Dibuja Aspecto Evaluado ---
+        x_start = pdf.get_x()
+        y_start = pdf.get_y()
 
-        col_widths = [140, 40]  # Ancho de columnas
+        pdf.multi_cell(col_widths[0], 8, aspecto, border=1)
 
-        # Encabezado tabla
-        pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
-        pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
-        pdf.ln()
+        y_end = pdf.get_y()
 
-        pdf.set_font('Arial', '', 11)
+        # --- Dibuja Cumple ---
+        pdf.set_xy(x_start + col_widths[0], y_start)
+        pdf.cell(col_widths[1], altura_fila, cumple, border=1, align='C')
 
-        for aspecto, cumple in checklist.items():
-            if pdf.get_y() > 270:
-                pdf.add_page()
-                pdf.set_font('Arial', 'B', 12)
-                pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
-                pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
-                pdf.ln()
-                pdf.set_font('Arial', '', 11)
+        pdf.set_y(y_end)
 
-            # Guarda posición de inicio
-            x_start = pdf.get_x()
-            y_start = pdf.get_y()
-
-            # Crea la celda grande del texto
-            pdf.multi_cell(col_widths[0], 8, aspecto, border=1)
-
-            y_end = pdf.get_y()
-            altura_fila = y_end - y_start
-
-            # Vuelve para crear "Cumple"
-            pdf.set_xy(x_start + col_widths[0], y_start)
-            pdf.cell(col_widths[1], altura_fila, cumple, border=1, align='C')
-
-            pdf.set_y(y_end)
 
     # ---- Contenido del PDF ----
     add_section("Datos Generales", "\n".join([f"{k}: {v}" for k, v in datos["datos_generales"].items()]))
