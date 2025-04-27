@@ -98,15 +98,7 @@ def generar_pdf(datos):
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    pdf.ln(15)
-    pdf.set_font('Arial', 'B', 14)
-    pdf.set_text_color(0, 51, 102)
-    pdf.cell(0, 10, 'Datos Generales', ln=True)
-    pdf.set_font('Arial', '', 12)
-    pdf.set_text_color(0, 0, 0)
-    for k, v in datos["datos_generales"].items():
-        pdf.cell(0, 8, f"{k}: {v}", ln=True)
-
+    # ---- Función para agregar sección de texto ----
     def add_section(title, content):
         pdf.ln(8)
         pdf.set_font('Arial', 'B', 14)
@@ -116,7 +108,34 @@ def generar_pdf(datos):
         pdf.set_text_color(0, 0, 0)
         pdf.multi_cell(0, 8, content)
 
-    # Texto institucional fijo
+    # ---- Función para agregar tablas de checklist ----
+    def add_table_section(title, checklist_dict):
+        pdf.ln(10)
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(0, 51, 102)
+        pdf.cell(0, 10, title, ln=True)
+
+        pdf.ln(4)
+        pdf.set_font('Arial', 'B', 12)
+        pdf.set_text_color(0, 0, 0)
+
+        # Encabezado tabla
+        pdf.cell(140, 8, 'Aspecto Evaluado', border=1, align='C')
+        pdf.cell(40, 8, 'Cumple', border=1, align='C')
+        pdf.ln()
+
+        pdf.set_font('Arial', '', 11)
+        for aspecto, resultado in checklist_dict.items():
+            pdf.cell(140, 8, aspecto, border=1)
+            pdf.cell(40, 8, resultado, border=1, align='C')
+            pdf.ln()
+
+    # ---- Contenido ----
+    pdf.ln(10)
+    add_section("Datos Generales", "")
+    for k, v in datos["datos_generales"].items():
+        pdf.multi_cell(0, 8, f"{k}: {v}")
+
     add_section("Objetivo del Acompañamiento",
                 "El objetivo principal del acompañamiento fue fortalecer las competencias operativas y preventivas del personal policial "
                 "en la elaboración de órdenes de ejecución, basadas en el análisis de informe territorial, percepción ciudadana, causas "
@@ -126,8 +145,7 @@ def generar_pdf(datos):
     add_section("Antecedentes como Referencia para el Taller",
                 "Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:")
 
-    for k, v in datos["antecedentes"].items():
-        pdf.cell(0, 8, f"{k} - Cumple: {v}", ln=True)
+    add_table_section("Antecedentes como Referencia para el Taller", datos["antecedentes"])
 
     add_section("Implementación del Taller",
                 "Resultados Esperados:\n"
@@ -135,21 +153,13 @@ def generar_pdf(datos):
                 "- Fortalecer la capacidad del personal policial para redactar órdenes de ejecución claras, basadas en insumos estratégicos.\n"
                 "- Actualizar actividades estratégicas, indicadores y metas, asegurando su alineación con las problemáticas priorizadas.")
 
-    add_section("Evaluación de la Aplicación de Insumos Mostrados en el Taller", "")
-    for k, v in datos["insumos"].items():
-        pdf.cell(0, 8, f"{k} - Cumple: {v}", ln=True)
+    add_table_section("Evaluación de la Aplicación de Insumos Mostrados en el Taller", datos["insumos"])
 
-    add_section("Evaluación de la Elaboración de la Orden de Ejecución durante el Taller", "")
-    for k, v in datos["orden"].items():
-        pdf.cell(0, 8, f"{k} - Cumple: {v}", ln=True)
+    add_table_section("Evaluación de la Elaboración de la Orden de Ejecución durante el Taller", datos["orden"])
 
-    add_section("Evaluación de las Fases de la Orden de Ejecución", "")
-    for k, v in datos["fases"].items():
-        pdf.cell(0, 8, f"{k} - Cumple: {v}", ln=True)
+    add_table_section("Evaluación de las Fases de la Orden de Ejecución", datos["fases"])
 
-    add_section("Seguimiento: Matrices, Actividades, Indicadores y Metas", "")
-    for k, v in datos["seguimiento"].items():
-        pdf.cell(0, 8, f"{k} - Cumple: {v}", ln=True)
+    add_table_section("Seguimiento: Matrices, Actividades, Indicadores y Metas", datos["seguimiento"])
 
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 14)
@@ -196,3 +206,4 @@ if enviar:
             file_name=nombre_archivo,
             mime="application/pdf"
         )
+
