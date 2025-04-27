@@ -43,40 +43,6 @@ with st.form("formulario_informe"):
     insumos["Percepción Ciudadana"] = st.selectbox("Percepción Ciudadana", opciones, key="insumo_4")
     insumos["Victimización Ciudadana"] = st.selectbox("Victimización Ciudadana", opciones, key="insumo_5")
     insumos["Problemáticas Priorizadas"] = st.selectbox("Problemáticas Priorizadas", opciones, key="insumo_6")
-
-    st.subheader("🔹 Evaluación de la Elaboración de la Orden de Ejecución durante el Taller")
-    orden = {}
-    orden["Portada"] = st.selectbox("Portada", opciones, key="orden_1")
-    orden["Título"] = st.selectbox("Título", opciones, key="orden_2")
-    orden["Código"] = st.selectbox("Código", opciones, key="orden_3")
-    orden["Fecha de Ejecución"] = st.selectbox("Fecha de Ejecución", opciones, key="orden_4")
-    orden["Vigencia de la Operación"] = st.selectbox("Vigencia de la Operación", opciones, key="orden_5")
-
-    st.subheader("🔹 Evaluación de las Fases de la Orden de Ejecución")
-    fases = {}
-    fases["Ambientación"] = st.selectbox("Ambientación", opciones, key="fase_1")
-    fases["Finalidad"] = st.selectbox("Finalidad", opciones, key="fase_2")
-    fases["Fase Preoperativa"] = st.selectbox("Fase Preoperativa", opciones, key="fase_3")
-    fases["Fase Operativa"] = st.selectbox("Fase Operativa", opciones, key="fase_4")
-    fases["Fase Postoperativa"] = st.selectbox("Fase Postoperativa", opciones, key="fase_5")
-
-    st.subheader("🔹 Seguimiento: Matrices, Actividades, Indicadores y Metas")
-    seguimiento = {}
-    seguimiento["Se revisó y ajustó las actividades estratégicas de líneas de acción."] = st.selectbox(
-        "Se revisó y ajustó las actividades estratégicas de líneas de acción.", opciones, key="seguimiento_1")
-    seguimiento["Se revisó y ajustó los indicadores de las líneas de acción."] = st.selectbox(
-        "Se revisó y ajustó los indicadores de las líneas de acción.", opciones, key="seguimiento_2")
-    seguimiento["Se revisó y actualizó la meta planteada para la ejecución del año 2025."] = st.selectbox(
-        "Se revisó y actualizó la meta planteada para la ejecución del año 2025.", opciones, key="seguimiento_3")
-    seguimiento["Se revisó y actualizó la meta bianual."] = st.selectbox(
-        "Se revisó y actualizó la meta bianual.", opciones, key="seguimiento_4")
-    seguimiento["Se actualizaron las metas en el Informe Trimestral de avance de líneas de acción."] = st.selectbox(
-        "Se actualizaron las metas en el Informe Trimestral de avance de líneas de acción.", opciones, key="seguimiento_5")
-
-    st.subheader("🔹 Conclusión Final")
-    conclusion = st.text_area("Conclusión Final")
-
-    enviar = st.form_submit_button("📤 Generar Informe PDF")
 # ---- FUNCIÓN PARA CREAR EL PDF ----
 class PDF(FPDF):
     def header(self):
@@ -105,7 +71,7 @@ def generar_pdf(datos):
     pdf.set_font('Arial', '', 12)
     pdf.set_text_color(0, 0, 0)
     for k, v in datos["datos_generales"].items():
-        pdf.cell(0, 8, f"{k}: {v}", ln=True)
+        pdf.multi_cell(0, 8, f"{k}: {v}")
 
     def add_section(title, content):
         pdf.ln(8)
@@ -116,7 +82,7 @@ def generar_pdf(datos):
         pdf.set_text_color(0, 0, 0)
         pdf.multi_cell(0, 8, content)
 
-    # Texto institucional fijo
+    # Texto institucional
     add_section("Objetivo del Acompañamiento",
                 "El objetivo principal del acompañamiento fue fortalecer las competencias operativas y preventivas del personal policial "
                 "en la elaboración de órdenes de ejecución, basadas en el análisis de informe territorial, percepción ciudadana, causas "
@@ -127,7 +93,7 @@ def generar_pdf(datos):
                 "Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:")
 
     for k, v in datos["antecedentes"].items():
-        pdf.cell(0, 8, f"{k} - Cumple: {v}", ln=True)
+        pdf.multi_cell(0, 8, f"{k} - Cumple: {v}")
 
     add_section("Implementación del Taller",
                 "Resultados Esperados:\n"
@@ -137,19 +103,18 @@ def generar_pdf(datos):
 
     add_section("Evaluación de la Aplicación de Insumos Mostrados en el Taller", "")
     for k, v in datos["insumos"].items():
-        pdf.cell(0, 8, f"{k} - Cumple: {v}", ln=True)
-
+        pdf.multi_cell(0, 8, f"{k} - Cumple: {v}")
     add_section("Evaluación de la Elaboración de la Orden de Ejecución durante el Taller", "")
     for k, v in datos["orden"].items():
-        pdf.cell(0, 8, f"{k} - Cumple: {v}", ln=True)
+        pdf.multi_cell(0, 8, f"{k} - Cumple: {v}")
 
     add_section("Evaluación de las Fases de la Orden de Ejecución", "")
     for k, v in datos["fases"].items():
-        pdf.cell(0, 8, f"{k} - Cumple: {v}", ln=True)
+        pdf.multi_cell(0, 8, f"{k} - Cumple: {v}")
 
     add_section("Seguimiento: Matrices, Actividades, Indicadores y Metas", "")
     for k, v in datos["seguimiento"].items():
-        pdf.cell(0, 8, f"{k} - Cumple: {v}", ln=True)
+        pdf.multi_cell(0, 8, f"{k} - Cumple: {v}")
 
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 14)
@@ -163,7 +128,8 @@ def generar_pdf(datos):
     pdf.output(buffer)
     buffer.seek(0)
     return buffer
-# ---- DESPUÉS DE ENVIAR FORMULARIO ----
+
+# ---- CAPTURA DEL FORMULARIO Y GENERACIÓN DEL PDF ----
 if enviar:
     if not delegacion or not fecha_realizacion or not facilitadores or not jefe:
         st.error("⚠️ Completa todos los campos para generar el informe.")
@@ -196,5 +162,4 @@ if enviar:
             file_name=nombre_archivo,
             mime="application/pdf"
         )
-
 
