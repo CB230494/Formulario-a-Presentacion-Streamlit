@@ -68,6 +68,12 @@ with st.form("formulario_informe"):
 
     st.subheader("🔹 Conclusión Final")
     conclusion = st.text_area("Conclusión Final")
+    
+    evidencias = st.file_uploader(
+    "Subir Evidencia Fotográfica (puede subir varias imágenes)",
+    type=["jpg", "jpeg", "png"],
+    accept_multiple_files=True
+    )
 
     enviar = st.form_submit_button("📤 Generar Informe PDF")
 # ---- FUNCIÓN PARA CREAR EL PDF CORREGIDO ----
@@ -240,6 +246,20 @@ def generar_pdf(datos):
     pdf.set_text_color(0, 0, 0)
     pdf.multi_cell(0, 8, datos["conclusion"])
 
+if datos.get("evidencias"):
+    pdf.add_page()  # Opcional: para que las evidencias vayan en una nueva página limpia
+    pdf.set_font('Arial', 'B', 14)
+    pdf.set_text_color(0, 51, 153)
+    pdf.cell(0, 10, 'Evidencia Fotográfica', ln=True)
+    pdf.ln(5)
+
+    for imagen in datos["evidencias"]:
+        if imagen is not None:
+            # Cargar la imagen como bytes
+            imagen_bytes = BytesIO(imagen.read())
+            pdf.image(imagen_bytes, x=20, w=170)  # Ajuste de tamaño de ancho
+            pdf.ln(10)
+
     buffer = BytesIO()
     pdf.output(buffer)
     buffer.seek(0)
@@ -270,6 +290,7 @@ if enviar:
             "fases": fases,
             "seguimiento": seguimiento,
             "conclusion": conclusion
+            "evidencias": evidencias
         }
 
         pdf_buffer = generar_pdf(datos)
