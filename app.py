@@ -93,7 +93,8 @@ class PDF(FPDF):
         # Línea verde inferior
         self.set_draw_color(0, 102, 0)
         self.set_line_width(0.8)
-        self.line(10, 25, 200, 25)
+        self.line(35, 25, 200, 25)
+
 
     def footer(self):
         self.set_y(-20)
