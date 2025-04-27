@@ -109,8 +109,7 @@ def generar_pdf(datos):
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    tablas_contador = 0
-    tablas_por_pagina = 2
+    tablas_contador = 0  # Controlar manualmente cuántas tablas llevamos
 
     def add_section(title, content):
         pdf.ln(8)
@@ -122,64 +121,61 @@ def generar_pdf(datos):
         pdf.set_text_color(0, 0, 0)
         pdf.multi_cell(0, 8, content)
 
-def add_table(title, checklist, extra_text=None, salto_pagina=True):
-    nonlocal tablas_contador
+    def add_table(title, checklist, extra_text=None, salto_pagina=True):
+        nonlocal_tablas = 0  # Esta variable va solo dentro del método para local control
 
-    if tablas_contador % tablas_por_pagina == 0 and tablas_contador != 0 and salto_pagina:
-        pdf.add_page()
-
-    pdf.ln(8)
-    pdf.set_font('Arial', 'B', 14)
-    pdf.set_text_color(0, 102, 0)
-    pdf.cell(0, 10, title, ln=True)
-    pdf.ln(4)
-
-    if extra_text:
-        pdf.set_font('Arial', '', 12)
-        pdf.set_text_color(0, 0, 0)
-        pdf.multi_cell(0, 8, extra_text)
-        pdf.ln(2)
-
-    col_widths = [140, 40]
-
-    pdf.set_font('Arial', 'B', 12)
-    pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
-    pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
-    pdf.ln()
-
-    pdf.set_font('Arial', '', 11)
-    pdf.set_text_color(0, 0, 0)
-
-    for aspecto, cumple in checklist.items():
-        num_lines = 1
-        text_width = pdf.get_string_width(aspecto)
-        if text_width > col_widths[0]:
-            num_lines = int(text_width / col_widths[0]) + 1
-        altura_fila = 8 * num_lines
-
-        if pdf.get_y() + altura_fila > 270:
+        if tablas_contador % 2 == 0 and tablas_contador != 0 and salto_pagina:
             pdf.add_page()
-            pdf.set_font('Arial', 'B', 12)
-            pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
-            pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
-            pdf.ln()
-            pdf.set_font('Arial', '', 11)
 
-        x_start = pdf.get_x()
-        y_start = pdf.get_y()
-        pdf.multi_cell(col_widths[0], 8, aspecto, border=1)
+        pdf.ln(8)
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(0, 102, 0)
+        pdf.cell(0, 10, title, ln=True)
+        pdf.ln(4)
 
-        y_end = pdf.get_y()
+        if extra_text:
+            pdf.set_font('Arial', '', 12)
+            pdf.set_text_color(0, 0, 0)
+            pdf.multi_cell(0, 8, extra_text)
+            pdf.ln(2)
 
-        pdf.set_xy(x_start + col_widths[0], y_start)
-        pdf.cell(col_widths[1], altura_fila, cumple, border=1, align='C')
+        col_widths = [140, 40]
 
-        pdf.set_y(y_end)
+        pdf.set_font('Arial', 'B', 12)
+        pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
+        pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
+        pdf.ln()
 
-    tablas_contador += 1
+        pdf.set_font('Arial', '', 11)
+        pdf.set_text_color(0, 0, 0)
 
+        for aspecto, cumple in checklist.items():
+            num_lines = 1
+            text_width = pdf.get_string_width(aspecto)
+            if text_width > col_widths[0]:
+                num_lines = int(text_width / col_widths[0]) + 1
+            altura_fila = 8 * num_lines
 
-    # ---- Página 1 ----
+            if pdf.get_y() + altura_fila > 270:
+                pdf.add_page()
+                pdf.set_font('Arial', 'B', 12)
+                pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
+                pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
+                pdf.ln()
+                pdf.set_font('Arial', '', 11)
+
+            x_start = pdf.get_x()
+            y_start = pdf.get_y()
+            pdf.multi_cell(col_widths[0], 8, aspecto, border=1)
+
+            y_end = pdf.get_y()
+
+            pdf.set_xy(x_start + col_widths[0], y_start)
+            pdf.cell(col_widths[1], altura_fila, cumple, border=1, align='C')
+
+            pdf.set_y(y_end)
+
+    # ---- Página 1: Títulos y textos ----
     add_section("Datos Generales", "\n".join([f"{k}: {v}" for k, v in datos["datos_generales"].items()]))
 
     add_section("Objetivo del Acompañamiento",
@@ -188,24 +184,33 @@ def add_table(title, checklist, extra_text=None, salto_pagina=True):
                 "socioculturales y estructurales, así como en las problemáticas priorizadas, fomentando también la correcta documentación "
                 "de balances operativos e informes de gestión, en el marco de la Estrategia Integral Sembremos Seguridad.")
 
-    
+    add_section("Antecedentes como Referencia para el Taller",
+                "Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:")
 
     pdf.add_page()
 
-    # ---- Página 2 y 3 ----
-    
+    # ---- Página 2 y 3: Tablas ----
     add_table(
-    "Antecedentes como Referencia para el Taller",
-    datos["antecedentes"],
-    extra_text="Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:")
-    add_table("Evaluación de la Aplicación de Insumos Mostrados en el Taller", datos["insumos"])
-    add_table("Evaluación de la Elaboración de la Orden de Ejecución durante el Taller", datos["orden"])
-    add_table("Evaluación de las Fases de la Orden de Ejecución", datos["fases"])
+        "Antecedentes como Referencia para el Taller",
+        datos["antecedentes"],
+        extra_text="Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:"
+    )
+    tablas_contador += 1
 
-    # ---- NUEVA PÁGINA para el cuadro 5 + Conclusión ----
+    add_table("Evaluación de la Aplicación de Insumos Mostrados en el Taller", datos["insumos"])
+    tablas_contador += 1
+
+    add_table("Evaluación de la Elaboración de la Orden de Ejecución durante el Taller", datos["orden"])
+    tablas_contador += 1
+
+    add_table("Evaluación de las Fases de la Orden de Ejecución", datos["fases"])
+    tablas_contador += 1
+
+    # ---- NUEVA PÁGINA para el cuadro 5 + Conclusión
     pdf.add_page()
 
     add_table("Seguimiento: Matrices, Actividades, Indicadores y Metas", datos["seguimiento"], salto_pagina=False)
+    tablas_contador += 1
 
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 14)
