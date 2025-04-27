@@ -260,10 +260,10 @@ if datos.get("evidencias"):
             pdf.image(imagen_bytes, x=20, w=170)  # Ajuste de tamaño de ancho
             pdf.ln(10)
 
-    buffer = BytesIO()
-    pdf.output(buffer)
-    buffer.seek(0)
-    return buffer
+buffer = BytesIO()
+pdf.output(buffer)
+buffer.seek(0)
+return buffer
 
 
 
