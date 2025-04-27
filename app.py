@@ -200,9 +200,8 @@ def generar_pdf(datos):
     add_table(
     "Evaluación de la Aplicación de Insumos Mostrados en el Taller",
     datos["insumos"],
-    extra_text="Se evaluó la comprensión y el uso adecuado de los insumos principales del taller, identificando fortalezas y áreas de mejora en la aplicación de elementos esenciales para la elaboración de órdenes de ejecución basadas en el diagnóstico territorial."
-)
-tablas_contador += 1
+    extra_text="Se evaluó la comprensión y el uso adecuado de los insumos principales del taller, identificando fortalezas y áreas de mejora en la aplicación de elementos esenciales para la elaboración de órdenes de ejecución basadas en el diagnóstico territorial.")
+    tablas_contador += 1
 
 
 
