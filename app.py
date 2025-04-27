@@ -73,20 +73,24 @@ with st.form("formulario_informe"):
 # ---- FUNCIÓN PARA CREAR EL PDF CORREGIDO ----
 class PDF(FPDF):
     def header(self):
-        # Logo colocado más pequeño y arriba
+        # Dibujar un círculo verde para el logo
+        self.set_draw_color(0, 102, 0)  # Verde oscuro
+        self.set_line_width(1)
+        self.ellipse(8, 5, 24, 24)  # Círculo (x, y, ancho, alto)
+
+        # Colocar el logo más pequeño dentro del círculo
         self.image('logo.png', 10, 8, 20)
 
-        # Espacio debajo del logo
+        # Mover un poco el título
         self.set_y(10)
         self.set_font('Arial', 'B', 12)
         self.set_text_color(0, 102, 0)  # Verde oscuro
 
-        # Primer línea del título
-        self.cell(0, 5, 'Estrategia Sembremos Seguridad ', ln=True, align='C')
-        # Segunda línea del título
-        self.cell(0, 8, 'Generador de Informe de Acompañamiento-2025', ln=True, align='C')
+        # Título dividido en dos líneas
+        self.cell(0, 5, 'Estrategia Sembremos Seguridad', ln=True, align='C')
+        self.cell(0, 8, 'Generador de Informe de Acompañamiento 2025', ln=True, align='C')
 
-        # Línea fina debajo del header
+        # Línea verde inferior
         self.set_draw_color(0, 102, 0)
         self.set_line_width(0.8)
         self.line(10, 25, 200, 25)
@@ -106,24 +110,23 @@ def generar_pdf(datos):
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    tablas_contador = 0  # Para controlar los cuadros
-    tablas_por_pagina = 2  # Máximo 2 tablas por página
+    tablas_contador = 0
+    tablas_por_pagina = 2
 
     def add_section(title, content):
         pdf.ln(8)
         pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(0, 102, 0)  # Verde oscuro en títulos
+        pdf.set_text_color(0, 102, 0)
         pdf.cell(0, 10, title, ln=True)
         pdf.ln(2)
         pdf.set_font('Arial', '', 12)
-        pdf.set_text_color(0, 0, 0)  # Texto normal en negro
+        pdf.set_text_color(0, 0, 0)
         pdf.multi_cell(0, 8, content)
 
-    def add_table(title, checklist):
+    def add_table(title, checklist, salto_pagina=True):
         nonlocal tablas_contador
 
-        # Cada 2 tablas -> salto de página
-        if tablas_contador % tablas_por_pagina == 0 and tablas_contador != 0:
+        if tablas_contador % tablas_por_pagina == 0 and tablas_contador != 0 and salto_pagina:
             pdf.add_page()
 
         pdf.ln(8)
@@ -170,7 +173,7 @@ def generar_pdf(datos):
 
         tablas_contador += 1
 
-    # ---- Página 1: Solo textos ----
+    # ---- Página 1 ----
     add_section("Datos Generales", "\n".join([f"{k}: {v}" for k, v in datos["datos_generales"].items()]))
 
     add_section("Objetivo del Acompañamiento",
@@ -182,18 +185,18 @@ def generar_pdf(datos):
     add_section("Antecedentes como Referencia para el Taller",
                 "Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:")
 
-    pdf.add_page()  # 🔵 Ahora empieza la Página 2 para las tablas
+    pdf.add_page()
 
     # ---- Página 2 y 3: Tablas ----
     add_table("Antecedentes como Referencia para el Taller", datos["antecedentes"])
     add_table("Evaluación de la Aplicación de Insumos Mostrados en el Taller", datos["insumos"])
     add_table("Evaluación de la Elaboración de la Orden de Ejecución durante el Taller", datos["orden"])
     add_table("Evaluación de las Fases de la Orden de Ejecución", datos["fases"])
-    add_table("Seguimiento: Matrices, Actividades, Indicadores y Metas", datos["seguimiento"])
 
-    # ---- Página final: Conclusión ----
-    pdf.add_page()
-    pdf.ln(8)
+    # ---- Última tabla + conclusión en la misma página ----
+    add_table("Seguimiento: Matrices, Actividades, Indicadores y Metas", datos["seguimiento"], salto_pagina=False)
+
+    pdf.ln(10)
     pdf.set_font('Arial', 'B', 14)
     pdf.set_text_color(0, 102, 0)
     pdf.cell(0, 10, 'Conclusión Final', ln=True)
