@@ -2,6 +2,7 @@ import streamlit as st
 from fpdf import FPDF
 import datetime
 from io import BytesIO
+from PIL import Image
 
 st.set_page_config(page_title="Generador de Informe de Acompañamiento", layout="centered")
 st.title("🚔 Estrategia Sembremos Seguridad-Informe de Acompañamiento Taller 2025 ")
@@ -111,6 +112,8 @@ class PDF(FPDF):
 
 
 
+from PIL import Image  # <- Asegúrate de tenerlo importado arriba
+
 def generar_pdf(datos):
     pdf = PDF()
     pdf.add_page()
@@ -129,7 +132,7 @@ def generar_pdf(datos):
         pdf.multi_cell(0, 8, content)
 
     def add_table(title, checklist, extra_text=None, salto_pagina=True):
-        nonlocal tablas_contador  # corregido: era "tablas_contador"
+        nonlocal tablas_contador
         
         if tablas_contador % 2 == 0 and tablas_contador != 0 and salto_pagina:
             pdf.add_page()
@@ -238,20 +241,29 @@ def generar_pdf(datos):
     pdf.set_text_color(0, 0, 0)
     pdf.multi_cell(0, 8, datos["conclusion"])
 
-   if datos.get("evidencias"):
-    pdf.add_page()
-    pdf.ln(20)  # Espacio para no chocar con el encabezado
-    pdf.set_font('Arial', 'B', 14)
-    pdf.set_text_color(0, 51, 153)
-    pdf.cell(0, 10, 'Evidencia Fotográfica', ln=True)
-    pdf.ln(5)
+    # ---- Evidencias ----
+    if datos.get("evidencias"):
+        pdf.add_page()
+        pdf.ln(20)
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(0, 51, 153)
+        pdf.cell(0, 10, 'Evidencia Fotográfica', ln=True)
+        pdf.ln(5)
 
-    for imagen in datos["evidencias"]:
-        if imagen is not None:
-            imagen_bytes = BytesIO(imagen.read())
-            pdf.image(imagen_bytes, x=40, w=120)  # <<< imagen más pequeña y centrada
-            pdf.ln(10)
+        for imagen in datos["evidencias"]:
+            if imagen is not None:
+                imagen_bytes = BytesIO(imagen.read())
 
+                # Ajustar tamaño proporcional
+                img = Image.open(imagen_bytes)
+                ancho, alto = img.size
+                nuevo_ancho = 120
+                escala = nuevo_ancho / ancho
+                nuevo_alto = alto * escala
+
+                imagen_bytes.seek(0)  # Reiniciar el puntero
+                pdf.image(imagen_bytes, x=40, w=nuevo_ancho, h=nuevo_alto)
+                pdf.ln(10)
 
     # ---- Finalizar PDF ----
     buffer = BytesIO()
