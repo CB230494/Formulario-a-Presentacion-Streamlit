@@ -70,7 +70,7 @@ with st.form("formulario_informe"):
     conclusion = st.text_area("Conclusión Final")
 
     enviar = st.form_submit_button("📤 Generar Informe PDF")
-# ---- FUNCIÓN PARA CREAR EL PDF ----
+# ---- FUNCIÓN PARA CREAR EL PDF CORREGIDO ----
 class PDF(FPDF):
     def header(self):
         self.set_fill_color(0, 51, 102)
@@ -92,7 +92,7 @@ def generar_pdf(datos):
     pdf.set_auto_page_break(auto=True, margin=15)
 
     def add_section(title, content):
-        if pdf.get_y() > 230:  # Control de salto de página antes de sección
+        if pdf.get_y() > 230:
             pdf.add_page()
         pdf.ln(8)
         pdf.set_font('Arial', 'B', 14)
@@ -114,25 +114,42 @@ def generar_pdf(datos):
 
         pdf.set_font('Arial', 'B', 12)
         pdf.set_text_color(0, 0, 0)
-        pdf.cell(140, 8, 'Aspecto Evaluado', border=1, align='C')
-        pdf.cell(40, 8, 'Cumple', border=1, align='C')
+
+        col_widths = [140, 40]  # Ancho de columnas
+
+        # Encabezado tabla
+        pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
+        pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
         pdf.ln()
 
         pdf.set_font('Arial', '', 11)
+
         for aspecto, cumple in checklist.items():
             if pdf.get_y() > 270:
                 pdf.add_page()
                 pdf.set_font('Arial', 'B', 12)
-                pdf.cell(140, 8, 'Aspecto Evaluado', border=1, align='C')
-                pdf.cell(40, 8, 'Cumple', border=1, align='C')
+                pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
+                pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
                 pdf.ln()
                 pdf.set_font('Arial', '', 11)
 
-            pdf.cell(140, 8, aspecto, border=1)
-            pdf.cell(40, 8, cumple, border=1, align='C')
-            pdf.ln()
+            # Guarda posición de inicio
+            x_start = pdf.get_x()
+            y_start = pdf.get_y()
 
-    # ---- CONTENIDO DEL PDF ----
+            # Crea la celda grande del texto
+            pdf.multi_cell(col_widths[0], 8, aspecto, border=1)
+
+            y_end = pdf.get_y()
+            altura_fila = y_end - y_start
+
+            # Vuelve para crear "Cumple"
+            pdf.set_xy(x_start + col_widths[0], y_start)
+            pdf.cell(col_widths[1], altura_fila, cumple, border=1, align='C')
+
+            pdf.set_y(y_end)
+
+    # ---- Contenido del PDF ----
     add_section("Datos Generales", "\n".join([f"{k}: {v}" for k, v in datos["datos_generales"].items()]))
 
     add_section("Objetivo del Acompañamiento",
@@ -160,6 +177,7 @@ def generar_pdf(datos):
 
     add_table("Seguimiento: Matrices, Actividades, Indicadores y Metas", datos["seguimiento"])
 
+    # ---- Conclusión Final ----
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 14)
     pdf.set_text_color(0, 51, 102)
@@ -172,6 +190,7 @@ def generar_pdf(datos):
     pdf.output(buffer)
     buffer.seek(0)
     return buffer
+
 # ---- DESPUÉS DE ENVIAR FORMULARIO ----
 if enviar:
     if not delegacion or not fecha_realizacion or not facilitadores or not jefe:
