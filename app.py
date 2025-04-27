@@ -84,7 +84,8 @@ class PDF(FPDF):
         self.set_y(-20)
         self.set_font('Arial', 'I', 10)
         self.set_text_color(0, 0, 0)
-        self.cell(0, 10, 'Modelo Preventivo de Gestión Policial – Estrategia Sembremos Seguridad', align='C')
+        self.cell(0, 10, 'Modelo Preventivo de Gestion Policial - Estrategia Sembremos Seguridad', align='C')
+
 
 def generar_pdf(datos):
     pdf = PDF()
