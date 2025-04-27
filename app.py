@@ -238,20 +238,20 @@ def generar_pdf(datos):
     pdf.set_text_color(0, 0, 0)
     pdf.multi_cell(0, 8, datos["conclusion"])
 
-    # ---- Evidencias ----
-    if datos.get("evidencias"):
-        pdf.add_page()
-        pdf.ln(20)
-        pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(0, 51, 153)
-        pdf.cell(0, 10, 'Evidencia Fotográfica', ln=True)
-        pdf.ln(5)
+   if datos.get("evidencias"):
+    pdf.add_page()
+    pdf.ln(20)  # Espacio para no chocar con el encabezado
+    pdf.set_font('Arial', 'B', 14)
+    pdf.set_text_color(0, 51, 153)
+    pdf.cell(0, 10, 'Evidencia Fotográfica', ln=True)
+    pdf.ln(5)
 
-        for imagen in datos["evidencias"]:
-            if imagen is not None:
-                imagen_bytes = BytesIO(imagen.read())
-                pdf.image(imagen_bytes, x=20, w=170)
-                pdf.ln(10)
+    for imagen in datos["evidencias"]:
+        if imagen is not None:
+            imagen_bytes = BytesIO(imagen.read())
+            pdf.image(imagen_bytes, x=40, w=120)  # <<< imagen más pequeña y centrada
+            pdf.ln(10)
+
 
     # ---- Finalizar PDF ----
     buffer = BytesIO()
