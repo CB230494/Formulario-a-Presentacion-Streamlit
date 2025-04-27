@@ -237,33 +237,34 @@ def generar_pdf(datos):
 
 
 
-    pdf.ln(10)
+pdf.ln(10)
+pdf.set_font('Arial', 'B', 14)
+pdf.set_text_color(0, 51, 153)
+pdf.cell(0, 10, 'Conclusión Final', ln=True)
+pdf.ln(4)
+pdf.set_font('Arial', '', 12)
+pdf.set_text_color(0, 0, 0)
+pdf.multi_cell(0, 8, datos["conclusion"])
+
+if datos.get("evidencias"):
+    pdf.add_page()  # Opcional: para que las evidencias vayan en una nueva página limpia
     pdf.set_font('Arial', 'B', 14)
     pdf.set_text_color(0, 51, 153)
-    pdf.cell(0, 10, 'Conclusión Final', ln=True)
-    pdf.ln(4)
-    pdf.set_font('Arial', '', 12)
-    pdf.set_text_color(0, 0, 0)
-    pdf.multi_cell(0, 8, datos["conclusion"])
+    pdf.cell(0, 10, 'Evidencia Fotográfica', ln=True)
+    pdf.ln(5)
 
-    if datos.get("evidencias"):
-         pdf.add_page()  # Opcional: para que las evidencias vayan en una nueva página limpia
-         pdf.set_font('Arial', 'B', 14)
-         pdf.set_text_color(0, 51, 153)
-         pdf.cell(0, 10, 'Evidencia Fotográfica', ln=True)
-         pdf.ln(5)
-
-         for imagen in datos["evidencias"]:
-             if imagen is not None:
+    for imagen in datos["evidencias"]:
+        if imagen is not None:
             # Cargar la imagen como bytes
-             imagen_bytes = BytesIO(imagen.read())
-             pdf.image(imagen_bytes, x=20, w=170)  # Ajuste de tamaño de ancho
-             pdf.ln(10)
+            imagen_bytes = BytesIO(imagen.read())
+            pdf.image(imagen_bytes, x=20, w=170)  # Ajuste de tamaño de ancho
+            pdf.ln(10)
 
-    buffer = BytesIO()
-    pdf.output(buffer)
-    buffer.seek(0)
-    return buffer
+buffer = BytesIO()
+pdf.output(buffer)
+buffer.seek(0)
+return buffer
+
 
 
 
