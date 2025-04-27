@@ -220,8 +220,7 @@ def generar_pdf(datos):
     tablas_contador += 1
 
 
-    # ---- NUEVA PÁGINA para el cuadro 5 + Conclusión
-    pdf.add_page()
+   
 
     add_table(
     "Seguimiento: Matrices, Actividades, Indicadores y Metas",
