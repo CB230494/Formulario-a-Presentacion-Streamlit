@@ -197,7 +197,7 @@ def generar_pdf(datos):
     )
     tablas_contador += 1
 
-   add_table(
+    add_table(
     "Evaluación de la Aplicación de Insumos Mostrados en el Taller",
     datos["insumos"],
     extra_text="Se evaluó el uso de insumos clave como la participación, el análisis estructural, las causas socioculturales y la percepción ciudadana.\n\nSe encontró lo siguiente:")
