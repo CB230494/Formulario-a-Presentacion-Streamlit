@@ -186,10 +186,10 @@ def generar_pdf(datos):
     pdf.add_page()
 
     # ---- Página 2 y 3 ----
-    add_section("Antecedentes como Referencia para el Taller",
+    add_section("Antecedentes como Referencia para el Taller","Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:"
                 )
     
-    add_table("Antecedentes como Referencia para el Taller","Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:", datos["antecedentes"])
+    add_table("Antecedentes como Referencia para el Taller", datos["antecedentes"])
     add_table("Evaluación de la Aplicación de Insumos Mostrados en el Taller", datos["insumos"])
     add_table("Evaluación de la Elaboración de la Orden de Ejecución durante el Taller", datos["orden"])
     add_table("Evaluación de las Fases de la Orden de Ejecución", datos["fases"])
