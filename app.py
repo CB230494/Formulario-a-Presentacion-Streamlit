@@ -4,7 +4,7 @@ import datetime
 from io import BytesIO
 
 st.set_page_config(page_title="Generador de Informe de Acompañamiento", layout="centered")
-st.title("🚔 Generador de Informe de Acompañamiento - Estrategia Sembremos Seguridad")
+st.title("🚔 Estrategia Sembremos Seguridad-Generador de Informe de Acompañamiento 2025 ")
 
 # ---- FORMULARIO ----
 with st.form("formulario_informe"):
@@ -78,13 +78,13 @@ class PDF(FPDF):
         self.set_y(5)
         self.set_font('Arial', 'B', 16)
         self.set_text_color(255, 255, 255)
-        self.cell(0, 10, 'Informe de Acompañamiento - Estrategia Sembremos Seguridad', ln=True, align='C')
+        self.cell(0, 10, 'Estrategia Sembremos Seguridad-Generador de Informe de Acompañamiento 2025', ln=True, align='C')
 
     def footer(self):
         self.set_y(-20)
         self.set_font('Arial', 'I', 10)
         self.set_text_color(0, 0, 0)
-        self.cell(0, 10, 'Dirección de Programas Policiales Preventivos - MSP', align='C')
+        self.cell(0, 10, 'Modelo Preventivo de Gestión Policial – Estrategia Sembremos Seguridad', align='C')
 
 def generar_pdf(datos):
     pdf = PDF()
