@@ -129,8 +129,8 @@ def generar_pdf(datos):
         pdf.multi_cell(0, 8, content)
 
     def add_table(title, checklist, extra_text=None, salto_pagina=True):
-        nonlocal_tablas = 0  # Esta variable va solo dentro del método para local control
-
+        nonlocal tablas_contador  # corregido: era "tablas_contador"
+        
         if tablas_contador % 2 == 0 and tablas_contador != 0 and salto_pagina:
             pdf.add_page()
 
@@ -190,10 +190,6 @@ def generar_pdf(datos):
             "Asimismo, se brindó orientación en la identificación y utilización de los elementos esenciales contenidos en el informe territorial, con el propósito de mejorar la planificación de las intervenciones policiales. "
             "Todo esto se desarrolló fomentando la correcta documentación de balances operativos e informes de gestión, en el marco de la Estrategia Integral Sembremos Seguridad.")
 
-
-
-
-
     pdf.add_page()
 
     # ---- Página 2 y 3: Tablas ----
@@ -205,65 +201,63 @@ def generar_pdf(datos):
     tablas_contador += 1
 
     add_table(
-    "Evaluación de la Aplicación de Insumos Mostrados en el Taller",
-    datos["insumos"],
-    extra_text="Se evaluó la comprensión y el uso adecuado de los insumos principales del taller, identificando fortalezas y áreas de mejora en la aplicación de elementos esenciales para la elaboración de órdenes de ejecución basadas en el diagnóstico territorial.")
+        "Evaluación de la Aplicación de Insumos Mostrados en el Taller",
+        datos["insumos"],
+        extra_text="Se evaluó la comprensión y el uso adecuado de los insumos principales del taller, identificando fortalezas y áreas de mejora en la aplicación de elementos esenciales para la elaboración de órdenes de ejecución basadas en el diagnóstico territorial."
+    )
     tablas_contador += 1
-
-
-
 
     add_table(
-    "Evaluación de la Elaboración de la Orden de Ejecución durante el Taller",
-    datos["orden"],
-    extra_text="Se evaluó la elaboración de la orden de ejecución, valorando la estructura de portada, título, código, fecha y vigencia, así como el cumplimiento adecuado de las fases preoperativa, operativa y postoperativa, verificando su coherencia con los insumos territoriales y la planificación estratégica.")
+        "Evaluación de la Elaboración de la Orden de Ejecución durante el Taller",
+        datos["orden"],
+        extra_text="Se evaluó la elaboración de la orden de ejecución, valorando la estructura de portada, título, código, fecha y vigencia, así como el cumplimiento adecuado de las fases preoperativa, operativa y postoperativa, verificando su coherencia con los insumos territoriales y la planificación estratégica."
+    )
     tablas_contador += 1
-
 
     add_table(
-    "Evaluación de las Fases de la Orden de Ejecución",
-    datos["fases"],
-    extra_text="Se analizó el cumplimiento de las fases preoperativa, operativa y postoperativa, identificando fortalezas y áreas de mejora en su estructuración, verificando su alineación con los objetivos estratégicos y las necesidades detectadas en el informe territorial.")
+        "Evaluación de las Fases de la Orden de Ejecución",
+        datos["fases"],
+        extra_text="Se analizó el cumplimiento de las fases preoperativa, operativa y postoperativa, identificando fortalezas y áreas de mejora en su estructuración, verificando su alineación con los objetivos estratégicos y las necesidades detectadas en el informe territorial."
+    )
     tablas_contador += 1
-
-
-   
 
     add_table(
-    "Seguimiento: Matrices, Actividades, Indicadores y Metas",
-    datos["seguimiento"],
-    extra_text="Se revisaron y ajustaron las matrices de líneas de acción y la cadena de resultados, fortaleciendo la planificación operativa y actualizando los compromisos institucionales en el marco de la Estrategia Integral Sembremos Seguridad.")
+        "Seguimiento: Matrices, Actividades, Indicadores y Metas",
+        datos["seguimiento"],
+        extra_text="Se revisaron y ajustaron las matrices de líneas de acción y la cadena de resultados, fortaleciendo la planificación operativa y actualizando los compromisos institucionales en el marco de la Estrategia Integral Sembremos Seguridad."
+    )
     tablas_contador += 1
 
-
-
-pdf.ln(10)
-pdf.set_font('Arial', 'B', 14)
-pdf.set_text_color(0, 51, 153)
-pdf.cell(0, 10, 'Conclusión Final', ln=True)
-pdf.ln(4)
-pdf.set_font('Arial', '', 12)
-pdf.set_text_color(0, 0, 0)
-pdf.multi_cell(0, 8, datos["conclusion"])
-
-if datos.get("evidencias"):
-    pdf.add_page()  # Opcional: para que las evidencias vayan en una nueva página limpia
+    # ---- Conclusión ----
+    pdf.ln(10)
     pdf.set_font('Arial', 'B', 14)
     pdf.set_text_color(0, 51, 153)
-    pdf.cell(0, 10, 'Evidencia Fotográfica', ln=True)
-    pdf.ln(5)
+    pdf.cell(0, 10, 'Conclusión Final', ln=True)
+    pdf.ln(4)
+    pdf.set_font('Arial', '', 12)
+    pdf.set_text_color(0, 0, 0)
+    pdf.multi_cell(0, 8, datos["conclusion"])
 
-    for imagen in datos["evidencias"]:
-        if imagen is not None:
-            # Cargar la imagen como bytes
-            imagen_bytes = BytesIO(imagen.read())
-            pdf.image(imagen_bytes, x=20, w=170)  # Ajuste de tamaño de ancho
-            pdf.ln(10)
+    # ---- Evidencias ----
+    if datos.get("evidencias"):
+        pdf.add_page()
+        pdf.set_font('Arial', 'B', 14)
+        pdf.set_text_color(0, 51, 153)
+        pdf.cell(0, 10, 'Evidencia Fotográfica', ln=True)
+        pdf.ln(5)
 
-buffer = BytesIO()
-pdf.output(buffer)
-buffer.seek(0)
+        for imagen in datos["evidencias"]:
+            if imagen is not None:
+                imagen_bytes = BytesIO(imagen.read())
+                pdf.image(imagen_bytes, x=20, w=170)
+                pdf.ln(10)
+
+    # ---- Finalizar PDF ----
+    buffer = BytesIO()
+    pdf.output(buffer)
+    buffer.seek(0)
     return buffer
+
 
 
 
