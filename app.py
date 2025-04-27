@@ -81,14 +81,14 @@ class PDF(FPDF):
         # Espacio debajo del logo
         self.set_y(10)
         self.set_font('Arial', 'B', 12)
-        self.set_text_color(0, 102, 0)  # Verde oscuro
+        self.set_text_color(0, 51, 153)  # Verde oscuro
 
         # Título en dos líneas
         self.cell(0, 5, 'Estrategia Sembremos Seguridad', ln=True, align='C')
         self.cell(0, 8, 'Generador de Informe de Acompañamiento 2025', ln=True, align='C')
 
         # Línea verde inferior
-        self.set_draw_color(0, 102, 0)
+        self.set_draw_color(0, 51, 153)
         self.set_line_width(0.8)
         self.line(35, 25, 200, 25)
 
@@ -96,8 +96,9 @@ class PDF(FPDF):
     def footer(self):
         self.set_y(-20)
         self.set_font('Arial', 'I', 10)
-        self.set_text_color(0, 102, 0)
-        self.cell(0, 10, 'Modelo Preventivo de Gestión Policial - Estrategia Sembremos Seguridad', align='C')
+        self.set_text_color(0, 51, 153)
+        self.cell(0, 10, f'Página {self.page_no()} - Modelo Preventivo de Gestión Policial - Estrategia Sembremos Seguridad', align='C')
+
 
 
 
@@ -114,7 +115,7 @@ def generar_pdf(datos):
     def add_section(title, content):
         pdf.ln(8)
         pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(0, 102, 0)
+        pdf.set_text_color(0, 51, 153)
         pdf.cell(0, 10, title, ln=True)
         pdf.ln(2)
         pdf.set_font('Arial', '', 12)
@@ -129,7 +130,7 @@ def generar_pdf(datos):
 
         pdf.ln(8)
         pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(0, 102, 0)
+        pdf.set_text_color(0, 51, 153)
         pdf.cell(0, 10, title, ln=True)
         pdf.ln(4)
 
@@ -232,7 +233,7 @@ def generar_pdf(datos):
 
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 14)
-    pdf.set_text_color(0, 102, 0)
+    pdf.set_text_color(0, 51, 153)
     pdf.cell(0, 10, 'Conclusión Final', ln=True)
     pdf.ln(4)
     pdf.set_font('Arial', '', 12)
