@@ -71,7 +71,7 @@ with st.form("formulario_informe"):
     conclusion = st.text_area("Conclusión Final")
     
     evidencias = st.file_uploader(
-    "Subir Evidencia Fotográfica (puede subir varias imágenes)",
+    "Subir Evidencia Fotográfica, si va tomar la fotogràfia hacerlo de forma horizontal (puede subir varias imágenes)",
     type=["jpg", "jpeg", "png"],
     accept_multiple_files=True
     )
