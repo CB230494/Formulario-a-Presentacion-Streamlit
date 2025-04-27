@@ -73,22 +73,22 @@ with st.form("formulario_informe"):
 # ---- FUNCIÓN PARA CREAR EL PDF CORREGIDO ----
 class PDF(FPDF):
     def header(self):
-        # Dibujar un círculo verde para el logo
+        # Dibujar un marco cuadrado verde
         self.set_draw_color(0, 102, 0)  # Verde oscuro
         self.set_line_width(1)
-        self.ellipse(8, 5, 24, 24)  # Círculo (x, y, ancho, alto)
+        self.rect(8, 5, 24, 24)  # Cuadro que rodea el logo perfectamente
 
-        # Colocar el logo más pequeño dentro del círculo
-        self.image('logo.png', 10, 8, 20)
+        # Colocar el logo centrado dentro del cuadro
+        self.image('logo.png', 9, 6, 22)  # Un poquito más pequeño que el cuadro
 
-        # Mover un poco el título
+        # Espacio debajo del logo
         self.set_y(10)
         self.set_font('Arial', 'B', 12)
         self.set_text_color(0, 102, 0)  # Verde oscuro
 
-        # Título dividido en dos líneas
-        self.cell(0, 5, 'Estrategia Sembremos Seguridad', ln=True, align='C')
-        self.cell(0, 8, 'Generador de Informe de Acompañamiento 2025', ln=True, align='C')
+        # Título en dos líneas
+        self.cell(0, 5, 'Generador de Informe de Acompañamiento 2025', ln=True, align='C')
+        self.cell(0, 8, 'Estrategia Sembremos Seguridad', ln=True, align='C')
 
         # Línea verde inferior
         self.set_draw_color(0, 102, 0)
@@ -100,6 +100,7 @@ class PDF(FPDF):
         self.set_font('Arial', 'I', 10)
         self.set_text_color(0, 102, 0)
         self.cell(0, 10, 'Dirección de Programas Policiales Preventivos - Ministerio de Seguridad Pública', align='C')
+
 
 
 
@@ -187,13 +188,15 @@ def generar_pdf(datos):
 
     pdf.add_page()
 
-    # ---- Página 2 y 3: Tablas ----
+    # ---- Página 2 y 3 ----
     add_table("Antecedentes como Referencia para el Taller", datos["antecedentes"])
     add_table("Evaluación de la Aplicación de Insumos Mostrados en el Taller", datos["insumos"])
     add_table("Evaluación de la Elaboración de la Orden de Ejecución durante el Taller", datos["orden"])
     add_table("Evaluación de las Fases de la Orden de Ejecución", datos["fases"])
 
-    # ---- Última tabla + conclusión en la misma página ----
+    # ---- NUEVA PÁGINA para el cuadro 5 + Conclusión ----
+    pdf.add_page()
+
     add_table("Seguimiento: Matrices, Actividades, Indicadores y Metas", datos["seguimiento"], salto_pagina=False)
 
     pdf.ln(10)
