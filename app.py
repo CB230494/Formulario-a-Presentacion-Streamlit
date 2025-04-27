@@ -73,25 +73,27 @@ with st.form("formulario_informe"):
 # ---- FUNCIÓN PARA CREAR EL PDF CORREGIDO ----
 class PDF(FPDF):
     def header(self):
-        # Colocar el logo
-        self.image('logo.png', 10, 6, 30) # Ajusta ruta y tamaño aquí
-
-        # Configurar color verde oscuro
-        self.set_y(10)
-        self.set_font('Arial', 'B', 14)
+        # Logo a la izquierda
+        self.image('logo.png', 10, 8, 20)  # Más pequeño para no invadir
+        self.set_y(8)  # Mover el texto un poco más abajo
+        self.set_font('Arial', 'B', 13)
         self.set_text_color(0, 102, 0)  # Verde oscuro
+
+        # Centrar el título manualmente
+        self.cell(0, 5, '', ln=True)  # Línea en blanco
         self.cell(0, 10, 'Generador de Informe de Acompañamiento - Estrategia Sembremos Seguridad', ln=True, align='C')
 
-        # Línea fina debajo del header
+        # Línea verde
         self.set_draw_color(0, 102, 0)
         self.set_line_width(0.8)
-        self.line(10, 20, 200, 20)
+        self.line(10, 25, 200, 25)
 
     def footer(self):
         self.set_y(-20)
         self.set_font('Arial', 'I', 10)
-        self.set_text_color(0, 0, 0)
+        self.set_text_color(0, 102, 0)  # Verde oscuro también en pie
         self.cell(0, 10, 'Dirección de Programas Policiales Preventivos - Ministerio de Seguridad Pública', align='C')
+
 
 
 
@@ -100,27 +102,33 @@ def generar_pdf(datos):
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
+    tablas_contador = 0  # Para controlar cuántas tablas llevamos
+
     def add_section(title, content):
         if pdf.get_y() > 230:
             pdf.add_page()
         pdf.ln(8)
         pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(0, 102, 0)  # Verde oscuro
+        pdf.set_text_color(0, 102, 0)  # Verde oscuro solo en títulos
         pdf.cell(0, 10, title, ln=True)
         pdf.ln(2)
         pdf.set_font('Arial', '', 12)
-        pdf.set_text_color(0, 0, 0)
+        pdf.set_text_color(0, 0, 0)  # Texto normal en negro
         pdf.multi_cell(0, 8, content)
 
     def add_table(title, checklist):
-        pdf.add_page()  # Siempre empezar tabla en nueva página
+        nonlocal tablas_contador
+
+        if tablas_contador % 2 == 0 and tablas_contador != 0:
+            pdf.add_page()  # Cada dos tablas, nueva página
+
         pdf.ln(8)
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(0, 102, 0)
         pdf.cell(0, 10, title, ln=True)
         pdf.ln(4)
 
-        col_widths = [140, 40]  # Ancho de columnas
+        col_widths = [140, 40]
 
         pdf.set_font('Arial', 'B', 12)
         pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
@@ -128,6 +136,8 @@ def generar_pdf(datos):
         pdf.ln()
 
         pdf.set_font('Arial', '', 11)
+        pdf.set_text_color(0, 0, 0)
+
         for aspecto, cumple in checklist.items():
             num_lines = 1
             text_width = pdf.get_string_width(aspecto)
@@ -154,7 +164,9 @@ def generar_pdf(datos):
 
             pdf.set_y(y_end)
 
-    # ---- CONTENIDO ORDENADO ----
+        tablas_contador += 1  # Contar tablas pintadas
+
+    # ---- CONTENIDO GENERAL ----
     add_section("Datos Generales", "\n".join([f"{k}: {v}" for k, v in datos["datos_generales"].items()]))
 
     add_section("Objetivo del Acompañamiento",
@@ -166,18 +178,14 @@ def generar_pdf(datos):
     add_section("Antecedentes como Referencia para el Taller",
                 "Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:")
 
-    # A partir de aquí: tablas separadas en nueva página
+    # ---- TABLAS BIEN ORGANIZADAS ----
     add_table("Antecedentes como Referencia para el Taller", datos["antecedentes"])
-
     add_table("Evaluación de la Aplicación de Insumos Mostrados en el Taller", datos["insumos"])
-
     add_table("Evaluación de la Elaboración de la Orden de Ejecución durante el Taller", datos["orden"])
-
     add_table("Evaluación de las Fases de la Orden de Ejecución", datos["fases"])
-
     add_table("Seguimiento: Matrices, Actividades, Indicadores y Metas", datos["seguimiento"])
 
-    # Conclusión
+    # ---- CONCLUSIÓN FINAL ----
     pdf.add_page()
     pdf.ln(8)
     pdf.set_font('Arial', 'B', 14)
@@ -195,10 +203,11 @@ def generar_pdf(datos):
 
 
 
-# ---- DESPUÉS DE ENVIAR FORMULARIO ----
+
+# ---- BOTÓN PARA GENERAR Y DESCARGAR PDF ----
 if enviar:
     if not delegacion or not fecha_realizacion or not facilitadores or not jefe:
-        st.error("⚠️ Completa todos los campos para generar el informe.")
+        st.error("⚠️ Completa todos los campos principales para generar el informe.")
     else:
         datos = {
             "datos_generales": {
@@ -228,5 +237,6 @@ if enviar:
             file_name=nombre_archivo,
             mime="application/pdf"
         )
+
 
 
