@@ -213,8 +213,12 @@ def generar_pdf(datos):
     tablas_contador += 1
 
 
-    add_table("Evaluación de las Fases de la Orden de Ejecución", datos["fases"])
+    add_table(
+    "Evaluación de las Fases de la Orden de Ejecución",
+    datos["fases"],
+    extra_text="Se analizó el cumplimiento de las fases preoperativa, operativa y postoperativa, identificando fortalezas y áreas de mejora en su estructuración, verificando su alineación con los objetivos estratégicos y las necesidades detectadas en el informe territorial.")
     tablas_contador += 1
+
 
     # ---- NUEVA PÁGINA para el cuadro 5 + Conclusión
     pdf.add_page()
