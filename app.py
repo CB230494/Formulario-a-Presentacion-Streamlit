@@ -122,55 +122,62 @@ def generar_pdf(datos):
         pdf.set_text_color(0, 0, 0)
         pdf.multi_cell(0, 8, content)
 
-    def add_table(title, checklist, salto_pagina=True):
-        nonlocal tablas_contador
+def add_table(title, checklist, extra_text=None, salto_pagina=True):
+    nonlocal tablas_contador
 
-        if tablas_contador % tablas_por_pagina == 0 and tablas_contador != 0 and salto_pagina:
-            pdf.add_page()
+    if tablas_contador % tablas_por_pagina == 0 and tablas_contador != 0 and salto_pagina:
+        pdf.add_page()
 
-        pdf.ln(8)
-        pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(0, 102, 0)
-        pdf.cell(0, 10, title, ln=True)
-        pdf.ln(4)
+    pdf.ln(8)
+    pdf.set_font('Arial', 'B', 14)
+    pdf.set_text_color(0, 102, 0)
+    pdf.cell(0, 10, title, ln=True)
+    pdf.ln(4)
 
-        col_widths = [140, 40]
-
-        pdf.set_font('Arial', 'B', 12)
-        pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
-        pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
-        pdf.ln()
-
-        pdf.set_font('Arial', '', 11)
+    if extra_text:
+        pdf.set_font('Arial', '', 12)
         pdf.set_text_color(0, 0, 0)
+        pdf.multi_cell(0, 8, extra_text)
+        pdf.ln(2)
 
-        for aspecto, cumple in checklist.items():
-            num_lines = 1
-            text_width = pdf.get_string_width(aspecto)
-            if text_width > col_widths[0]:
-                num_lines = int(text_width / col_widths[0]) + 1
-            altura_fila = 8 * num_lines
+    col_widths = [140, 40]
 
-            if pdf.get_y() + altura_fila > 270:
-                pdf.add_page()
-                pdf.set_font('Arial', 'B', 12)
-                pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
-                pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
-                pdf.ln()
-                pdf.set_font('Arial', '', 11)
+    pdf.set_font('Arial', 'B', 12)
+    pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
+    pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
+    pdf.ln()
 
-            x_start = pdf.get_x()
-            y_start = pdf.get_y()
-            pdf.multi_cell(col_widths[0], 8, aspecto, border=1)
+    pdf.set_font('Arial', '', 11)
+    pdf.set_text_color(0, 0, 0)
 
-            y_end = pdf.get_y()
+    for aspecto, cumple in checklist.items():
+        num_lines = 1
+        text_width = pdf.get_string_width(aspecto)
+        if text_width > col_widths[0]:
+            num_lines = int(text_width / col_widths[0]) + 1
+        altura_fila = 8 * num_lines
 
-            pdf.set_xy(x_start + col_widths[0], y_start)
-            pdf.cell(col_widths[1], altura_fila, cumple, border=1, align='C')
+        if pdf.get_y() + altura_fila > 270:
+            pdf.add_page()
+            pdf.set_font('Arial', 'B', 12)
+            pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
+            pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
+            pdf.ln()
+            pdf.set_font('Arial', '', 11)
 
-            pdf.set_y(y_end)
+        x_start = pdf.get_x()
+        y_start = pdf.get_y()
+        pdf.multi_cell(col_widths[0], 8, aspecto, border=1)
 
-        tablas_contador += 1
+        y_end = pdf.get_y()
+
+        pdf.set_xy(x_start + col_widths[0], y_start)
+        pdf.cell(col_widths[1], altura_fila, cumple, border=1, align='C')
+
+        pdf.set_y(y_end)
+
+    tablas_contador += 1
+
 
     # ---- Página 1 ----
     add_section("Datos Generales", "\n".join([f"{k}: {v}" for k, v in datos["datos_generales"].items()]))
