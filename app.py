@@ -73,18 +73,26 @@ with st.form("formulario_informe"):
 # ---- FUNCIÓN PARA CREAR EL PDF CORREGIDO ----
 class PDF(FPDF):
     def header(self):
-        self.set_fill_color(0, 51, 102)
-        self.rect(0, 0, 210, 15, 'F')
-        self.set_y(5)
-        self.set_font('Arial', 'B', 16)
-        self.set_text_color(255, 255, 255)
-        self.cell(0, 10, 'Estrategia Sembremos Seguridad-Generador de Informe de Acompañamiento 2025', ln=True, align='C')
+        # Colocar el logo
+        self.image('imagenes/logo.png', 10, 6, 30) # Ajusta ruta y tamaño aquí
+
+        # Configurar color verde oscuro
+        self.set_y(10)
+        self.set_font('Arial', 'B', 14)
+        self.set_text_color(0, 102, 0)  # Verde oscuro
+        self.cell(0, 10, 'Generador de Informe de Acompañamiento - Estrategia Sembremos Seguridad', ln=True, align='C')
+
+        # Línea fina debajo del header
+        self.set_draw_color(0, 102, 0)
+        self.set_line_width(0.8)
+        self.line(10, 20, 200, 20)
 
     def footer(self):
         self.set_y(-20)
         self.set_font('Arial', 'I', 10)
         self.set_text_color(0, 0, 0)
-        self.cell(0, 10, 'Modelo Preventivo de Gestion Policial - Estrategia Sembremos Seguridad', align='C')
+        self.cell(0, 10, 'Dirección de Programas Policiales Preventivos - Ministerio de Seguridad Pública', align='C')
+
 
 
 def generar_pdf(datos):
@@ -97,7 +105,7 @@ def generar_pdf(datos):
             pdf.add_page()
         pdf.ln(8)
         pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(0, 51, 102)
+        pdf.set_text_color(0, 102, 0)  # Verde oscuro
         pdf.cell(0, 10, title, ln=True)
         pdf.ln(2)
         pdf.set_font('Arial', '', 12)
@@ -105,33 +113,26 @@ def generar_pdf(datos):
         pdf.multi_cell(0, 8, content)
 
     def add_table(title, checklist):
-        if pdf.get_y() > 230:
-            pdf.add_page()
-        pdf.ln(10)
+        pdf.add_page()  # Siempre empezar tabla en nueva página
+        pdf.ln(8)
         pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(0, 51, 102)
+        pdf.set_text_color(0, 102, 0)
         pdf.cell(0, 10, title, ln=True)
         pdf.ln(4)
 
+        col_widths = [140, 40]  # Ancho de columnas
+
         pdf.set_font('Arial', 'B', 12)
-        pdf.set_text_color(0, 0, 0)
-
-        col_widths = [140, 40]
-
-        # Encabezado
         pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
         pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
         pdf.ln()
 
         pdf.set_font('Arial', '', 11)
-
         for aspecto, cumple in checklist.items():
-            # Calculamos si cabe
             num_lines = 1
             text_width = pdf.get_string_width(aspecto)
             if text_width > col_widths[0]:
                 num_lines = int(text_width / col_widths[0]) + 1
-
             altura_fila = 8 * num_lines
 
             if pdf.get_y() + altura_fila > 270:
@@ -142,20 +143,18 @@ def generar_pdf(datos):
                 pdf.ln()
                 pdf.set_font('Arial', '', 11)
 
-            # Dibuja Aspecto Evaluado
             x_start = pdf.get_x()
             y_start = pdf.get_y()
             pdf.multi_cell(col_widths[0], 8, aspecto, border=1)
 
             y_end = pdf.get_y()
 
-            # Dibuja Cumple
             pdf.set_xy(x_start + col_widths[0], y_start)
             pdf.cell(col_widths[1], altura_fila, cumple, border=1, align='C')
 
             pdf.set_y(y_end)
 
-    # ---- CONTENIDO COMPLETO ----
+    # ---- CONTENIDO ORDENADO ----
     add_section("Datos Generales", "\n".join([f"{k}: {v}" for k, v in datos["datos_generales"].items()]))
 
     add_section("Objetivo del Acompañamiento",
@@ -167,13 +166,8 @@ def generar_pdf(datos):
     add_section("Antecedentes como Referencia para el Taller",
                 "Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:")
 
+    # A partir de aquí: tablas separadas en nueva página
     add_table("Antecedentes como Referencia para el Taller", datos["antecedentes"])
-
-    add_section("Implementación del Taller",
-                "Resultados Esperados:\n"
-                "- Revisar las órdenes de ejecución previas para identificar áreas de mejora.\n"
-                "- Fortalecer la capacidad del personal policial para redactar órdenes de ejecución claras, basadas en insumos estratégicos.\n"
-                "- Actualizar actividades estratégicas, indicadores y metas, asegurando su alineación con las problemáticas priorizadas.")
 
     add_table("Evaluación de la Aplicación de Insumos Mostrados en el Taller", datos["insumos"])
 
@@ -183,10 +177,13 @@ def generar_pdf(datos):
 
     add_table("Seguimiento: Matrices, Actividades, Indicadores y Metas", datos["seguimiento"])
 
-    pdf.ln(10)
+    # Conclusión
+    pdf.add_page()
+    pdf.ln(8)
     pdf.set_font('Arial', 'B', 14)
-    pdf.set_text_color(0, 51, 102)
+    pdf.set_text_color(0, 102, 0)
     pdf.cell(0, 10, 'Conclusión Final', ln=True)
+    pdf.ln(4)
     pdf.set_font('Arial', '', 12)
     pdf.set_text_color(0, 0, 0)
     pdf.multi_cell(0, 8, datos["conclusion"])
@@ -195,6 +192,7 @@ def generar_pdf(datos):
     pdf.output(buffer)
     buffer.seek(0)
     return buffer
+
 
 
 # ---- DESPUÉS DE ENVIAR FORMULARIO ----
