@@ -73,10 +73,7 @@ with st.form("formulario_informe"):
 # ---- FUNCIÓN PARA CREAR EL PDF CORREGIDO ----
 class PDF(FPDF):
     def header(self):
-        # Dibujar un marco cuadrado verde
-        self.set_draw_color(0, 102, 0)  # Verde oscuro
-        self.set_line_width(1)
-        self.rect(8, 5, 24, 24)  # Cuadro que rodea el logo perfectamente
+        
 
         # Colocar el logo centrado dentro del cuadro
         self.image('logo.png', 9, 6, 22)  # Un poquito más pequeño que el cuadro
