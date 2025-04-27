@@ -206,8 +206,12 @@ def generar_pdf(datos):
 
 
 
-    add_table("Evaluación de la Elaboración de la Orden de Ejecución durante el Taller", datos["orden"])
+    add_table(
+    "Evaluación de la Elaboración de la Orden de Ejecución durante el Taller",
+    datos["orden"],
+    extra_text="Se evaluó la elaboración de la orden de ejecución, valorando la estructura de portada, título, código, fecha y vigencia, así como el cumplimiento adecuado de las fases preoperativa, operativa y postoperativa, verificando su coherencia con los insumos territoriales y la planificación estratégica.")
     tablas_contador += 1
+
 
     add_table("Evaluación de las Fases de la Orden de Ejecución", datos["fases"])
     tablas_contador += 1
