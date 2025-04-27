@@ -73,17 +73,20 @@ with st.form("formulario_informe"):
 # ---- FUNCIÓN PARA CREAR EL PDF CORREGIDO ----
 class PDF(FPDF):
     def header(self):
-        # Logo a la izquierda
-        self.image('logo.png', 10, 8, 20)  # Más pequeño para no invadir
-        self.set_y(8)  # Mover el texto un poco más abajo
-        self.set_font('Arial', 'B', 13)
+        # Logo colocado más pequeño y arriba
+        self.image('logo.png', 10, 8, 20)
+
+        # Espacio debajo del logo
+        self.set_y(10)
+        self.set_font('Arial', 'B', 12)
         self.set_text_color(0, 102, 0)  # Verde oscuro
 
-        # Centrar el título manualmente
-        self.cell(0, 5, '', ln=True)  # Línea en blanco
-        self.cell(0, 10, 'Generador de Informe de Acompañamiento - Estrategia Sembremos Seguridad', ln=True, align='C')
+        # Primer línea del título
+        self.cell(0, 5, 'Estrategia Sembremos Seguridad ', ln=True, align='C')
+        # Segunda línea del título
+        self.cell(0, 8, 'Generador de Informe de Acompañamiento-2025', ln=True, align='C')
 
-        # Línea verde
+        # Línea fina debajo del header
         self.set_draw_color(0, 102, 0)
         self.set_line_width(0.8)
         self.line(10, 25, 200, 25)
@@ -91,8 +94,9 @@ class PDF(FPDF):
     def footer(self):
         self.set_y(-20)
         self.set_font('Arial', 'I', 10)
-        self.set_text_color(0, 102, 0)  # Verde oscuro también en pie
+        self.set_text_color(0, 102, 0)
         self.cell(0, 10, 'Dirección de Programas Policiales Preventivos - Ministerio de Seguridad Pública', align='C')
+
 
 
 
@@ -102,14 +106,13 @@ def generar_pdf(datos):
     pdf.add_page()
     pdf.set_auto_page_break(auto=True, margin=15)
 
-    tablas_contador = 0  # Para controlar cuántas tablas llevamos
+    tablas_contador = 0  # Para controlar los cuadros
+    tablas_por_pagina = 2  # Máximo 2 tablas por página
 
     def add_section(title, content):
-        if pdf.get_y() > 230:
-            pdf.add_page()
         pdf.ln(8)
         pdf.set_font('Arial', 'B', 14)
-        pdf.set_text_color(0, 102, 0)  # Verde oscuro solo en títulos
+        pdf.set_text_color(0, 102, 0)  # Verde oscuro en títulos
         pdf.cell(0, 10, title, ln=True)
         pdf.ln(2)
         pdf.set_font('Arial', '', 12)
@@ -119,8 +122,9 @@ def generar_pdf(datos):
     def add_table(title, checklist):
         nonlocal tablas_contador
 
-        if tablas_contador % 2 == 0 and tablas_contador != 0:
-            pdf.add_page()  # Cada dos tablas, nueva página
+        # Cada 2 tablas -> salto de página
+        if tablas_contador % tablas_por_pagina == 0 and tablas_contador != 0:
+            pdf.add_page()
 
         pdf.ln(8)
         pdf.set_font('Arial', 'B', 14)
@@ -164,9 +168,9 @@ def generar_pdf(datos):
 
             pdf.set_y(y_end)
 
-        tablas_contador += 1  # Contar tablas pintadas
+        tablas_contador += 1
 
-    # ---- CONTENIDO GENERAL ----
+    # ---- Página 1: Solo textos ----
     add_section("Datos Generales", "\n".join([f"{k}: {v}" for k, v in datos["datos_generales"].items()]))
 
     add_section("Objetivo del Acompañamiento",
@@ -178,14 +182,16 @@ def generar_pdf(datos):
     add_section("Antecedentes como Referencia para el Taller",
                 "Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:")
 
-    # ---- TABLAS BIEN ORGANIZADAS ----
+    pdf.add_page()  # 🔵 Ahora empieza la Página 2 para las tablas
+
+    # ---- Página 2 y 3: Tablas ----
     add_table("Antecedentes como Referencia para el Taller", datos["antecedentes"])
     add_table("Evaluación de la Aplicación de Insumos Mostrados en el Taller", datos["insumos"])
     add_table("Evaluación de la Elaboración de la Orden de Ejecución durante el Taller", datos["orden"])
     add_table("Evaluación de las Fases de la Orden de Ejecución", datos["fases"])
     add_table("Seguimiento: Matrices, Actividades, Indicadores y Metas", datos["seguimiento"])
 
-    # ---- CONCLUSIÓN FINAL ----
+    # ---- Página final: Conclusión ----
     pdf.add_page()
     pdf.ln(8)
     pdf.set_font('Arial', 'B', 14)
@@ -200,6 +206,7 @@ def generar_pdf(datos):
     pdf.output(buffer)
     buffer.seek(0)
     return buffer
+
 
 
 
