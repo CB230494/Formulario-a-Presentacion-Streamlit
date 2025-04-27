@@ -179,7 +179,10 @@ def generar_pdf(datos):
     add_section("Datos Generales", "\n".join([f"{k}: {v}" for k, v in datos["datos_generales"].items()]))
 
 add_section("Objetivo del Acompañamiento",
-            "El objetivo principal del acompañamiento fue fortalecer las competencias operativas y preventivas del personal policial en la elaboración de órdenes de ejecución, a partir del análisis del informe territorial, la percepción ciudadana, las causas socioculturales y estructurales, así como de las problemáticas priorizadas. Asimismo, se brindó orientación en la identificación y utilización de los elementos esenciales contenidos en el informe territorial, con el propósito de mejorar la planificación de las intervenciones policiales. Todo esto se desarrolló fomentando la correcta documentación de balances operativos e informes de gestión, en el marco de la Estrategia Integral Sembremos Seguridad.")
+            "El objetivo principal del acompañamiento fue fortalecer las competencias operativas y preventivas del personal policial "
+            "en la elaboración de órdenes de ejecución, basadas en el análisis de informe territorial, percepción ciudadana, causas "
+            "socioculturales y estructurales, así como en las problemáticas priorizadas, fomentando también la correcta documentación "
+            "de balances operativos e informes de gestión, en el marco de la Estrategia Integral Sembremos Seguridad.")
 
 
 
