@@ -76,7 +76,7 @@ class PDF(FPDF):
         
 
         # Colocar el logo centrado dentro del cuadro
-        self.image('logo.jpeg', 9, 6, 22)  # Un poquito más pequeño que el cuadro
+        self.image('logo.png', 9, 6, 22)  # Un poquito más pequeño que el cuadro
 
         # Espacio debajo del logo
         self.set_y(10)
