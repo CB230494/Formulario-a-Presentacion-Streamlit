@@ -4,7 +4,7 @@ import datetime
 from io import BytesIO
 
 st.set_page_config(page_title="Generador de Informe de Acompañamiento", layout="centered")
-st.title("🚔 Estrategia Sembremos Seguridad-Generador de Informe de Acompañamiento 2025 ")
+st.title("🚔 Estrategia Sembremos Seguridad-Informe de Acompañamiento Taller 2025 ")
 
 # ---- FORMULARIO ----
 with st.form("formulario_informe"):
@@ -184,8 +184,7 @@ def generar_pdf(datos):
                 "socioculturales y estructurales, así como en las problemáticas priorizadas, fomentando también la correcta documentación "
                 "de balances operativos e informes de gestión, en el marco de la Estrategia Integral Sembremos Seguridad.")
 
-    add_section("Antecedentes como Referencia para el Taller",
-                "Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:")
+
 
     pdf.add_page()
 
