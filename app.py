@@ -84,8 +84,8 @@ class PDF(FPDF):
         self.set_text_color(0, 102, 0)  # Verde oscuro
 
         # Título en dos líneas
-        self.cell(0, 5, 'Generador de Informe de Acompañamiento 2025', ln=True, align='C')
-        self.cell(0, 8, 'Estrategia Sembremos Seguridad', ln=True, align='C')
+        self.cell(0, 5, 'Estrategia Sembremos Seguridad', ln=True, align='C')
+        self.cell(0, 8, 'Generador de Informe de Acompañamiento 2025', ln=True, align='C')
 
         # Línea verde inferior
         self.set_draw_color(0, 102, 0)
