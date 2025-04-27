@@ -223,8 +223,12 @@ def generar_pdf(datos):
     # ---- NUEVA PÁGINA para el cuadro 5 + Conclusión
     pdf.add_page()
 
-    add_table("Seguimiento: Matrices, Actividades, Indicadores y Metas", datos["seguimiento"], salto_pagina=False)
+    add_table(
+    "Seguimiento: Matrices, Actividades, Indicadores y Metas",
+    datos["seguimiento"],
+    extra_text="Se revisaron y ajustaron las matrices de líneas de acción y la cadena de resultados, fortaleciendo la planificación operativa, garantizando la coherencia de actividades, indicadores y metas con los objetivos institucionales, y actualizando los compromisos trimestrales y bianuales en el marco de la Estrategia Integral Sembremos Seguridad.")
     tablas_contador += 1
+
 
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 14)
