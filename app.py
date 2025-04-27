@@ -91,7 +91,7 @@ class PDF(FPDF):
 
         # Título en dos líneas
         self.cell(0, 5, 'Estrategia Sembremos Seguridad', ln=True, align='C')
-        self.cell(0, 8, 'Generador de Informe de Acompañamiento 2025', ln=True, align='C')
+        self.cell(0, 8, 'Informe de Acompañamiento 2025', ln=True, align='C')
 
         # Línea verde inferior
         self.set_draw_color(0, 51, 153)
@@ -241,6 +241,7 @@ def generar_pdf(datos):
     # ---- Evidencias ----
     if datos.get("evidencias"):
         pdf.add_page()
+        pdf.ln(20)
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(0, 51, 153)
         pdf.cell(0, 10, 'Evidencia Fotográfica', ln=True)
