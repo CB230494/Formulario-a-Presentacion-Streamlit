@@ -3,7 +3,6 @@ from fpdf import FPDF
 import datetime
 from io import BytesIO
 
-# ---- CONFIGURACIÓN GENERAL ----
 st.set_page_config(page_title="Generador de Informe de Acompañamiento", layout="centered")
 st.title("🚔 Generador de Informe de Acompañamiento - Estrategia Sembremos Seguridad")
 
@@ -25,9 +24,9 @@ with st.form("formulario_informe"):
         "Identificación de errores en la elaboración de órdenes de ejecución anteriores.": st.selectbox("Identificación de errores en la elaboración de órdenes de ejecución anteriores.", opciones, key="antecedente1"),
         "Abordaje de acciones estratégicas vinculadas a la línea de acción o a causas socioculturales y estructurales.": st.selectbox("Abordaje de acciones estratégicas vinculadas a la línea de acción o a causas socioculturales y estructurales.", opciones, key="antecedente2"),
         "Correcta utilización de los insumos del informe territorial (datos de participación, percepción, etc.).": st.selectbox("Correcta utilización de los insumos del informe territorial.", opciones, key="antecedente3"),
-        "Coherencia entre la problemática priorizada y la redacción de la ambientación y finalidad.": st.selectbox("Coherencia entre la problemática priorizada y la redacción de la ambientación y finalidad.", opciones, key="antecedente4"),
+        "Coherencia entre la problemática priorizada y la redacción de la ambientación y finalidad.": st.selectbox("Coherencia entre problemática y ambientación.", opciones, key="antecedente4"),
         "Aplicación adecuada de las fases preoperativa, operativa y postoperativa.": st.selectbox("Aplicación adecuada de las fases operativas.", opciones, key="antecedente5"),
-        "Documentación completa de balances operativos o informes de resultados.": st.selectbox("Documentación completa de balances operativos o informes de resultados.", opciones, key="antecedente6")
+        "Documentación completa de balances operativos o informes de resultados.": st.selectbox("Documentación completa de balances operativos.", opciones, key="antecedente6")
     }
 
     st.subheader("🔹 Evaluación de la Aplicación de Insumos Mostrados en el Taller")
@@ -93,6 +92,8 @@ def generar_pdf(datos):
     pdf.set_auto_page_break(auto=True, margin=15)
 
     def add_section(title, content):
+        if pdf.get_y() > 230:  # Control de salto de página antes de sección
+            pdf.add_page()
         pdf.ln(8)
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(0, 51, 102)
@@ -102,12 +103,15 @@ def generar_pdf(datos):
         pdf.set_text_color(0, 0, 0)
         pdf.multi_cell(0, 8, content)
 
-    def add_table_section(title, checklist_dict):
+    def add_table(title, checklist):
+        if pdf.get_y() > 230:
+            pdf.add_page()
         pdf.ln(10)
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(0, 51, 102)
         pdf.cell(0, 10, title, ln=True)
         pdf.ln(4)
+
         pdf.set_font('Arial', 'B', 12)
         pdf.set_text_color(0, 0, 0)
         pdf.cell(140, 8, 'Aspecto Evaluado', border=1, align='C')
@@ -115,8 +119,8 @@ def generar_pdf(datos):
         pdf.ln()
 
         pdf.set_font('Arial', '', 11)
-        for aspecto, resultado in checklist_dict.items():
-            if pdf.get_y() > 260:
+        for aspecto, cumple in checklist.items():
+            if pdf.get_y() > 270:
                 pdf.add_page()
                 pdf.set_font('Arial', 'B', 12)
                 pdf.cell(140, 8, 'Aspecto Evaluado', border=1, align='C')
@@ -125,15 +129,12 @@ def generar_pdf(datos):
                 pdf.set_font('Arial', '', 11)
 
             pdf.cell(140, 8, aspecto, border=1)
-            pdf.cell(40, 8, resultado, border=1, align='C')
+            pdf.cell(40, 8, cumple, border=1, align='C')
             pdf.ln()
 
-    # ---- DATOS GENERALES ----
-    add_section("Datos Generales", "")
-    for k, v in datos["datos_generales"].items():
-        pdf.multi_cell(0, 8, f"{k}: {v}")
+    # ---- CONTENIDO DEL PDF ----
+    add_section("Datos Generales", "\n".join([f"{k}: {v}" for k, v in datos["datos_generales"].items()]))
 
-    # ---- TEXTO FIJO DEL WORD ----
     add_section("Objetivo del Acompañamiento",
                 "El objetivo principal del acompañamiento fue fortalecer las competencias operativas y preventivas del personal policial "
                 "en la elaboración de órdenes de ejecución, basadas en el análisis de informe territorial, percepción ciudadana, causas "
@@ -143,24 +144,22 @@ def generar_pdf(datos):
     add_section("Antecedentes como Referencia para el Taller",
                 "Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:")
 
-    # ---- TABLAS DE RESULTADOS ----
-    add_table_section("Antecedentes como Referencia para el Taller", datos["antecedentes"])
+    add_table("Antecedentes como Referencia para el Taller", datos["antecedentes"])
 
     add_section("Implementación del Taller",
                 "Resultados Esperados:\n"
                 "- Revisar las órdenes de ejecución previas para identificar áreas de mejora.\n"
-                "- Fortalecer la capacidad del personal policial para redactar órdenes claras, basadas en insumos estratégicos.\n"
+                "- Fortalecer la capacidad del personal policial para redactar órdenes de ejecución claras, basadas en insumos estratégicos.\n"
                 "- Actualizar actividades estratégicas, indicadores y metas, asegurando su alineación con las problemáticas priorizadas.")
 
-    add_table_section("Evaluación de la Aplicación de Insumos Mostrados en el Taller", datos["insumos"])
+    add_table("Evaluación de la Aplicación de Insumos Mostrados en el Taller", datos["insumos"])
 
-    add_table_section("Evaluación de la Elaboración de la Orden de Ejecución durante el Taller", datos["orden"])
+    add_table("Evaluación de la Elaboración de la Orden de Ejecución durante el Taller", datos["orden"])
 
-    add_table_section("Evaluación de las Fases de la Orden de Ejecución", datos["fases"])
+    add_table("Evaluación de las Fases de la Orden de Ejecución", datos["fases"])
 
-    add_table_section("Seguimiento: Matrices, Actividades, Indicadores y Metas", datos["seguimiento"])
+    add_table("Seguimiento: Matrices, Actividades, Indicadores y Metas", datos["seguimiento"])
 
-    # ---- CONCLUSIÓN FINAL ----
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 14)
     pdf.set_text_color(0, 51, 102)
@@ -169,12 +168,11 @@ def generar_pdf(datos):
     pdf.set_text_color(0, 0, 0)
     pdf.multi_cell(0, 8, datos["conclusion"])
 
-    # Guardar en memoria
     buffer = BytesIO()
     pdf.output(buffer)
     buffer.seek(0)
     return buffer
-# ---- CAPTURA FINAL Y DESCARGA DEL PDF ----
+# ---- DESPUÉS DE ENVIAR FORMULARIO ----
 if enviar:
     if not delegacion or not fecha_realizacion or not facilitadores or not jefe:
         st.error("⚠️ Completa todos los campos para generar el informe.")
@@ -207,4 +205,5 @@ if enviar:
             file_name=nombre_archivo,
             mime="application/pdf"
         )
+
 
