@@ -19,7 +19,7 @@ with st.form("formulario_informe"):
     agente_preventivos = st.text_input("Agente de Programas Policiales Preventivos")
     opciones = ["Sí", "No"]
     acompaniamiento_coordinador = st.selectbox("Acompañamiento por parte del Coordinador Regional de Programas Preventivos", opciones)
-    acompaniamiento_operaciones = st.selectbox("Acompañamiento de agente de la Oficina de Operaciones Regional", opciones)
+    acompaniamiento_operaciones = st.selectbox("Acompañamiento por parte de agente de la Oficina de Operaciones Regional", opciones)
 
 
     opciones = ["Sí", "No"]
@@ -296,7 +296,7 @@ if enviar:
                 "Agente(s) Operacionales": agentes_operacionales,
                 "Agente de Programas Policiales Preventivos": agente_preventivos,
                 "Acompañamiento por parte del Coordinador Regional de Programas Preventivos": acompaniamiento_coordinador,
-                "Acompañamiento de agente de la Oficina de Operaciones Regional": acompaniamiento_operaciones
+                "Acompañamiento por parte de agente de la Oficina de Operaciones Regional": acompaniamiento_operaciones
             },
             "antecedentes": antecedentes,
             "insumos": insumos,
