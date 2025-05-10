@@ -104,9 +104,10 @@ def generar_pdf(datos):
 
     tablas_contador = 0
 
-    def ajustar_y_en_paginas_avanzadas():
-        if pdf.page_no() >= 5 and 10 <= pdf.get_y() <= 35:
-            pdf.set_y(50)
+    # Margen superior solo en páginas 5 en adelante
+    def ajustar_y_solo_si_pagina_avanzada():
+        if pdf.page_no() >= 5:
+            pdf.set_y(38)
 
     def add_section(title, content):
         pdf.ln(8)
@@ -123,7 +124,7 @@ def generar_pdf(datos):
 
         if tablas_contador % 2 == 0 and tablas_contador != 0 and salto_pagina:
             pdf.add_page()
-            ajustar_y_en_paginas_avanzadas()
+            ajustar_y_solo_si_pagina_avanzada()
 
         pdf.ln(8)
         pdf.set_font('Arial', 'B', 14)
@@ -152,7 +153,7 @@ def generar_pdf(datos):
 
             if pdf.get_y() + altura_fila > 270:
                 pdf.add_page()
-                ajustar_y_en_paginas_avanzadas()
+                ajustar_y_solo_si_pagina_avanzada()
                 pdf.set_font('Arial', 'B', 12)
                 pdf.cell(col_widths[0], 8, "Aspecto Evaluado", border=1, align='C')
                 pdf.cell(col_widths[1], 8, "Cumple", border=1, align='C')
@@ -176,7 +177,7 @@ def generar_pdf(datos):
         "Todo esto se desarrolló fomentando la correcta documentación de balances operativos e informes de gestión, en el marco de la Estrategia Integral Sembremos Seguridad.")
 
     pdf.add_page()
-    ajustar_y_en_paginas_avanzadas()
+    ajustar_y_solo_si_pagina_avanzada()
 
     add_table("Antecedentes como Referencia para el Taller", datos["antecedentes"],
               extra_text="Durante la revisión de las órdenes de ejecución previas, se identificaron los siguientes hallazgos:")
@@ -201,7 +202,7 @@ def generar_pdf(datos):
     # ---- Conclusión Final ----
     if pdf.get_y() > 240:
         pdf.add_page()
-        ajustar_y_en_paginas_avanzadas()
+        ajustar_y_solo_si_pagina_avanzada()
 
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 14)
@@ -215,8 +216,7 @@ def generar_pdf(datos):
     # ---- Evidencias Fotográficas ----
     if datos.get("evidencias"):
         pdf.add_page()
-        ajustar_y_en_paginas_avanzadas()
-        pdf.ln(20)
+        ajustar_y_solo_si_pagina_avanzada()
         pdf.set_font('Arial', 'B', 14)
         pdf.set_text_color(0, 51, 153)
         pdf.cell(0, 10, 'Evidencia Fotográfica', ln=True)
@@ -232,7 +232,7 @@ def generar_pdf(datos):
                 nuevo_alto = alto * escala
                 if pdf.get_y() + nuevo_alto + 20 > 270:
                     pdf.add_page()
-                    ajustar_y_en_paginas_avanzadas()
+                    ajustar_y_solo_si_pagina_avanzada()
                 imagen_bytes.seek(0)
                 pdf.image(imagen_bytes, x=40, w=nuevo_ancho, h=nuevo_alto)
                 pdf.ln(10)
@@ -241,6 +241,7 @@ def generar_pdf(datos):
     pdf.output(buffer)
     buffer.seek(0)
     return buffer
+
 
 
 
