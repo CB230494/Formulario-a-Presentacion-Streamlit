@@ -105,8 +105,8 @@ def generar_pdf(datos):
     tablas_contador = 0
 
     def ajustar_y_en_pagina_nueva():
-        if pdf.page_no() > 1 and pdf.get_y() < 35:
-            pdf.set_y(35)
+        if pdf.page_no() > 1 and pdf.get_y() < 25:
+            pdf.set_y(25)
 
     def add_section(title, content):
         ajustar_y_en_pagina_nueva()
