@@ -104,7 +104,6 @@ def generar_pdf(datos):
 
     tablas_contador = 0
 
-    # Función auxiliar: solo corrige el margen superior en páginas nuevas
     def ajustar_y_en_pagina_nueva():
         if pdf.page_no() > 1 and pdf.get_y() < 35:
             pdf.set_y(35)
@@ -116,6 +115,7 @@ def generar_pdf(datos):
         pdf.set_text_color(0, 51, 153)
         pdf.cell(0, 10, title, ln=True)
         pdf.ln(2)
+        ajustar_y_en_pagina_nueva()
         pdf.set_font('Arial', '', 12)
         pdf.set_text_color(0, 0, 0)
         pdf.multi_cell(0, 8, content)
@@ -135,6 +135,7 @@ def generar_pdf(datos):
         pdf.ln(4)
 
         if extra_text:
+            ajustar_y_en_pagina_nueva()
             pdf.set_font('Arial', '', 12)
             pdf.set_text_color(0, 0, 0)
             pdf.multi_cell(0, 8, extra_text)
@@ -244,6 +245,7 @@ def generar_pdf(datos):
     pdf.output(buffer)
     buffer.seek(0)
     return buffer
+
 
 if enviar:
     if not delegacion or not fecha_realizacion or not facilitadores or not jefe:
